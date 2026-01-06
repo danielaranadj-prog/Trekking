@@ -2,8 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patagonia Trekking 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Patagonia 2026</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#121212">
+    
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Russo+One&display=swap" rel="stylesheet">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23FF5722%22><path d=%22M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z%22/></svg>">
 
@@ -17,7 +21,6 @@
             --success: #76FF03;
             --font-head: 'Russo One', sans-serif;
             --font-body: 'Montserrat', sans-serif;
-            --header-height: 240px; /* Espacio reservado para el header fijo */
         }
 
         body, html {
@@ -25,7 +28,8 @@
             background-color: var(--bg-main);
             color: var(--text-white);
             font-family: var(--font-body);
-            scroll-behavior: smooth;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
         }
 
         /* --- LANDING PAGE --- */
@@ -33,174 +37,196 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at center, #263238 0%, #000000 100%);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 5000; transition: opacity 0.5s ease;
+            z-index: 9999; transition: opacity 0.6s ease, visibility 0.6s ease;
         }
-        #landing-page.hidden { opacity: 0; pointer-events: none; }
-        .logo-icon-lg { width: 80px; height: 80px; fill: var(--primary); margin-bottom: 20px; filter: drop-shadow(0 0 10px rgba(255,87,34,0.5)); }
-        .landing-title { font-family: var(--font-head); font-size: 3rem; text-align: center; line-height: 1.1; margin-bottom: 10px; }
+        #landing-page.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        
+        .logo-icon-lg { width: 90px; height: 90px; fill: var(--primary); margin-bottom: 25px; filter: drop-shadow(0 0 15px rgba(255,87,34,0.6)); animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0% {transform: translateY(0px);} 50% {transform: translateY(-10px);} 100% {transform: translateY(0px);} }
+        .landing-title { font-family: var(--font-head); font-size: 2.5rem; text-align: center; line-height: 1.1; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 1px; }
         .landing-title span { color: var(--primary); }
-        .start-btn { padding: 15px 40px; background: transparent; color: white; border: 2px solid var(--primary); font-family: var(--font-head); font-size: 1.2rem; cursor: pointer; border-radius: 50px; transition: 0.3s; }
-        .start-btn:hover { background: var(--primary); box-shadow: 0 0 20px var(--primary); transform: scale(1.05); }
+        .start-btn { padding: 16px 50px; background: transparent; color: white; border: 2px solid var(--primary); font-family: var(--font-head); font-size: 1.2rem; cursor: pointer; border-radius: 50px; transition: all 0.3s; letter-spacing: 2px; text-transform: uppercase; }
+        .start-btn:active { transform: scale(0.95); background: var(--primary); }
 
-        /* --- APP CONTAINER --- */
-        #app-container { display: none; }
-        #app-container.visible { display: block; animation: fadeIn 0.8s ease; }
-        @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+        /* --- MAIN APP --- */
+        #app-container { opacity: 0; transition: opacity 0.8s ease; }
+        #app-container.visible { opacity: 1; }
 
-        /* --- STICKY HEADER WRAPPER (LA MAGIA) --- */
+        /* Sticky Header */
         .sticky-wrapper {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            z-index: 1000;
-            background: rgba(18, 18, 18, 0.85); /* Fondo semi-transparente */
-            backdrop-filter: blur(12px); /* Efecto vidrio */
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            padding: 15px 20px 0 20px;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: rgba(18, 18, 18, 0.98);
+            border-bottom: 1px solid #333;
+            padding: 15px 20px 10px 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+            padding-top: env(safe-area-inset-top, 15px);
         }
 
-        /* Header Content */
-        .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .header-brand { display: flex; align-items: center; gap: 12px; }
-        .logo-icon-sm { width: 35px; height: 35px; fill: var(--primary); }
-        .header-title h1 { font-family: var(--font-head); font-size: 1.2rem; margin: 0; line-height: 1; }
+        .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .header-brand { display: flex; align-items: center; gap: 10px; }
+        .logo-icon-sm { width: 30px; height: 30px; fill: var(--primary); }
+        .header-title h1 { font-family: var(--font-head); font-size: 1.1rem; margin: 0; line-height: 1; letter-spacing: 0.5px; }
         .header-title span { color: var(--primary); }
+        .settings-btn { background: none; border: none; cursor: pointer; padding: 0; }
+        .settings-btn svg { width: 24px; height: 24px; fill: #555; transition: 0.3s; }
+        .settings-btn:hover svg { fill: white; transform: rotate(90deg); }
 
-        /* Controls Compactos */
-        .control-panel { padding-bottom: 15px; }
-        
-        .phases-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 5px; scrollbar-width: none; }
-        .phases-bar::-webkit-scrollbar { display: none; }
-        
-        .phase-btn { 
-            background: rgba(255,255,255,0.05); color: #888; border: 1px solid transparent; 
-            padding: 6px 14px; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.75rem; 
-            white-space: nowrap; transition: 0.2s; 
+        /* Stats HUD */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+        .stat-card { background: #252525; padding: 8px 5px; border-radius: 6px; text-align: center; border-bottom: 2px solid var(--primary); display: flex; flex-direction: column; justify-content: center; }
+        .stat-card h3 { font-size: 0.55rem; color: #999; margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card p { font-family: var(--font-head); font-size: 1.1rem; margin: 0; color: white; line-height: 1; }
+
+        /* --- NUEVO CONTROL PANEL (Fases + Dropdown) --- */
+        .control-panel { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; /* Fases a la izq, Filtro a la der */
+            gap: 10px;
+            padding-top: 5px;
         }
-        .phase-btn:hover { background: rgba(255,255,255,0.1); }
-        .phase-btn.active { background: var(--primary); color: white; box-shadow: 0 0 10px rgba(255,87,34,0.4); }
 
-        .types-bar { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 5px;}
-        .type-btn { 
-            background: transparent; border: 1px solid #444; color: var(--text-gray); 
-            padding: 6px 14px; border-radius: 20px; cursor: pointer; 
-            display: flex; align-items: center; gap: 6px; transition: 0.3s;
-            font-size: 0.75rem; font-weight: 600; white-space: nowrap;
+        /* Fases (Scroll horizontal si es necesario) */
+        .phases-bar { display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; }
+        .phase-btn { background: #333; color: #888; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.65rem; white-space: nowrap; transition: 0.2s;}
+        .phase-btn.active { background: var(--primary); color: white; }
+
+        /* --- DROPDOWN PERSONALIZADO --- */
+        .filter-dropdown-container {
+            position: relative;
+            min-width: 140px; /* Ancho fijo para el botón */
         }
-        .type-btn svg { width: 16px; height: 16px; fill: var(--text-gray); transition: 0.3s; }
-        .type-btn:hover { border-color: var(--primary); }
-        .type-btn.active { background: rgba(255, 87, 34, 0.15); border-color: var(--primary); color: var(--primary); }
-        .type-btn.active svg { fill: var(--primary); }
 
-        /* --- SCROLLABLE CONTENT AREA --- */
+        .filter-trigger-btn {
+            width: 100%;
+            background: #252525;
+            border: 1px solid #444;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            font-weight: 700;
+            transition: 0.2s;
+        }
+        .filter-trigger-btn span { display: flex; align-items: center; gap: 6px; }
+        .filter-trigger-btn svg { width: 14px; height: 14px; fill: var(--primary); }
+        .filter-trigger-btn:active { transform: scale(0.98); }
+
+        /* Menú Oculto */
+        .filter-menu {
+            position: absolute;
+            top: 110%; right: 0;
+            width: 160px;
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #444;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            padding: 5px;
+            display: none; /* Oculto por defecto */
+            flex-direction: column;
+            gap: 2px;
+            z-index: 2000;
+            animation: slideDownMenu 0.2s ease forwards;
+        }
+        @keyframes slideDownMenu { from {opacity:0; transform: translateY(-10px);} to {opacity:1; transform: translateY(0);} }
+
+        .filter-menu.show { display: flex; }
+
+        .filter-option {
+            background: transparent;
+            border: none;
+            color: #aaa;
+            padding: 10px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+        .filter-option svg { width: 16px; height: 16px; fill: #666; transition: 0.2s; }
+        .filter-option:hover { background: rgba(255, 255, 255, 0.05); color: white; }
+        .filter-option:hover svg { fill: white; }
+        
+        .filter-option.selected { background: rgba(255, 87, 34, 0.15); color: var(--primary); }
+        .filter-option.selected svg { fill: var(--primary); }
+
+        /* --- SCROLL CONTENT --- */
         .scroll-content {
-            margin-top: 210px; /* Empuja el contenido para que no quede bajo el header fijo */
-            padding: 20px;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
+            padding-top: 230px; /* Ajustado para el nuevo header */
+            padding-left: 15px; padding-right: 15px; padding-bottom: 80px;
+            max-width: 1000px; margin: 0 auto;
         }
 
-        /* Stats (Ahora scrollean) */
-        .dashboard-grid { 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
-            gap: 15px; margin-bottom: 40px; 
-            animation: slideDown 0.8s ease;
-        }
-        @keyframes slideDown { from {opacity:0; transform: translateY(-20px);} to {opacity:1; transform: translateY(0);} }
-
-        .stat-card { background: var(--bg-card); padding: 15px; border-radius: 8px; text-align: center; border-top: 3px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .stat-card h3 { font-size: 0.7rem; color: #777; margin: 0 0 5px 0; letter-spacing: 1px; font-weight: 600; }
-        .stat-card p { font-family: var(--font-head); font-size: 1.8rem; margin: 0; }
-
-        /* --- CALENDAR BLOCKS --- */
-        .month-block { 
-            margin-bottom: 40px; 
-            opacity: 0; 
-            transform: translateY(20px); 
-            animation: fadeInUp 0.6s ease forwards;
-        }
-        /* Delay escalonado para la animación bonita */
-        .month-block:nth-child(1) { animation-delay: 0.1s; }
-        .month-block:nth-child(2) { animation-delay: 0.2s; }
-        .month-block:nth-child(3) { animation-delay: 0.3s; }
-        
-        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
-
+        .month-block { margin-bottom: 30px; }
         .month-header { 
-            color: var(--primary); font-family: var(--font-head); font-size: 1.2rem; 
-            margin-bottom: 15px; border-left: 4px solid var(--primary); padding-left: 10px;
-            display: flex; align-items: center; background: linear-gradient(90deg, rgba(255,87,34,0.1) 0%, transparent 100%);
-            padding-top: 5px; padding-bottom: 5px; border-radius: 0 4px 4px 0;
+            color: var(--primary); font-family: var(--font-head); font-size: 1.1rem; 
+            margin-bottom: 10px; border-left: 4px solid var(--primary); padding-left: 10px;
+            text-transform: uppercase;
         }
 
-        /* Grid System */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
         .calendar-grid.filtered-mode { display: flex; flex-wrap: wrap; gap: 8px; }
         
-        .day-header-row { display: contents; }
-        .day-header { text-align: center; font-size: 0.65rem; color: #666; font-weight: 800; padding-bottom: 5px; }
+        .day-header { text-align: center; font-size: 0.6rem; color: #555; font-weight: 800; padding-bottom: 5px; }
 
-        /* Cards */
-        .day-card {
-            background: var(--bg-card); border-radius: 6px; padding: 8px 4px;
-            min-height: 90px; cursor: pointer; transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            border: 1px solid transparent; position: relative; overflow: hidden;
+        .day-card { 
+            background: var(--bg-card); border-radius: 6px; padding: 8px 4px; min-height: 85px; 
+            cursor: pointer; position: relative; display: flex; flex-direction: column; 
+            align-items: center; justify-content: space-between; border: 1px solid transparent;
+            transition: transform 0.2s;
         }
-        .day-card:hover { transform: translateY(-5px) scale(1.02); border-color: var(--primary); background: #252525; z-index: 10; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        
-        .day-card.completed { border-color: var(--success); background: rgba(118, 255, 3, 0.05); }
+        .day-card:active { transform: scale(0.95); }
+        .day-card.completed { border-color: var(--success); background: #1a2e1e; }
         .day-card.completed svg { fill: var(--success) !important; }
         .day-card.completed .activity-name { color: var(--success); }
-        
-        /* Ribbon de Fase */
-        .day-phase { 
-            position: absolute; top: 0; left: 0; 
-            font-size: 0.5rem; background: #333; color: #aaa; 
-            padding: 2px 5px; border-bottom-right-radius: 4px;
-        }
-        
-        .day-date { font-size: 0.6rem; color: #555; font-weight: 700; align-self: flex-end; margin-right: 4px; }
-        .activity-icon { width: 28px; height: 28px; fill: #546E7A; margin-top: 4px; transition: 0.3s;}
-        .activity-name { font-size: 0.65rem; text-align: center; color: white; font-weight: 400; line-height: 1.1; margin-bottom: 4px;}
+        .day-card.has-note::after { content: ''; position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; background: white; border-radius: 50%; }
 
-        /* Placeholder */
-        .day-card.empty { background: transparent; border: none; pointer-events: none; }
+        .day-phase { position: absolute; top: 0; left: 0; font-size: 0.5rem; background: #333; color: #aaa; padding: 2px 4px; border-bottom-right-radius: 4px; }
+        .day-date { font-size: 0.6rem; color: #555; font-weight: 700; align-self: flex-end; margin-right: 2px; }
+        .activity-icon { width: 24px; height: 24px; fill: #607D8B; margin-top: 4px; }
+        .activity-name { font-size: 0.6rem; text-align: center; color: white; line-height: 1.1; margin-bottom: 2px;}
         
-        /* Filtered Mode Widths */
+        .day-card.empty { background: transparent; border: none; pointer-events: none; }
         .calendar-grid.filtered-mode .day-card { width: 90px; }
 
-        /* MODAL */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 6000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .modal-content { background: #1a1a1a; padding: 30px; border-radius: 16px; width: 90%; max-width: 450px; border: 1px solid #333; box-shadow: 0 20px 60px rgba(0,0,0,0.9); transform: scale(0.9); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes popIn { to { transform: scale(1); } }
-        
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
-        .modal-header h2 { color: var(--primary); font-family: var(--font-head); margin: 0; font-size: 1.5rem; }
-        .close-btn { background: none; border: none; color: #777; font-size: 2rem; cursor: pointer; transition: 0.2s; }
-        .close-btn:hover { color: white; transform: rotate(90deg); }
-        
-        .coach-note { background: #111; padding: 15px; border-radius: 8px; border-left: 3px solid var(--primary); margin-bottom: 25px; }
-        .action-btn { width: 100%; padding: 18px; border: none; border-radius: 8px; font-family: var(--font-head); font-size: 1rem; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
-        .action-btn:active { transform: scale(0.98); }
+        /* MODALS */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; }
+        .modal-content { background: #1a1a1a; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; border: 1px solid #444; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .modal-header h2 { color: var(--primary); margin: 0; font-family: var(--font-head); font-size: 1.3rem; }
+        .close-btn { background: none; border: none; color: #777; font-size: 1.5rem; cursor: pointer; }
+        .coach-note { background: #111; padding: 10px; border-radius: 6px; border-left: 3px solid var(--primary); margin-bottom: 20px; }
+        .journal-input { width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 6px; margin-bottom: 15px; box-sizing: border-box; font-family: sans-serif; resize: vertical; min-height: 80px;}
+        .action-btn { width: 100%; padding: 15px; border: none; border-radius: 6px; font-family: var(--font-head); font-size: 1rem; cursor: pointer; text-transform: uppercase; }
         .btn-complete { background: var(--success); color: #000; }
         .btn-undo { background: #333; color: #ccc; }
 
-        /* Mobile Responsive */
+        /* SETTINGS MODAL */
+        #settingsModal .settings-option { background: #222; padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-small { background: var(--primary); color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.8rem; }
+
         @media (max-width: 600px) {
-            .scroll-content { margin-top: 230px; padding: 10px; }
-            .calendar-grid { grid-template-columns: repeat(7, minmax(35px, 1fr)); gap: 4px; }
+            .scroll-content { padding-top: 240px; padding-left: 5px; padding-right: 5px; }
+            .calendar-grid { grid-template-columns: repeat(7, minmax(35px, 1fr)); gap: 3px; }
             .day-card { min-height: 55px; padding: 2px; }
             .activity-icon { width: 18px; height: 18px; }
             .activity-name { display: none; }
             .day-phase { display: none; }
             .calendar-grid.filtered-mode .day-card { width: 48%; min-height: 90px; }
             .calendar-grid.filtered-mode .activity-name { display: block; }
-            .logo-icon-sm { width: 30px; height: 30px; }
-            .header-title h1 { font-size: 1rem; }
-            .current-date-text { font-size: 0.7rem; }
+            .landing-title { font-size: 2.2rem; }
+            /* header elements */
+            .main-header { margin-bottom: 5px; }
+            .dashboard-grid { margin-bottom: 5px; }
         }
     </style>
 </head>
@@ -211,6 +237,7 @@
         <svg id="icon-gym" viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 5.57 2 7.71 3.43 9.14 2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 18.43 22 16.29z"/></svg>
         <svg id="icon-cardio" viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
         <svg id="icon-rest" viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        <svg id="icon-filter" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
     </div>
 
     <div id="landing-page">
@@ -220,71 +247,63 @@
     </div>
 
     <div id="app-container">
-
         <div class="sticky-wrapper">
             <div class="main-header">
                 <div class="header-brand">
                     <svg class="logo-icon-sm" viewBox="0 0 24 24"><path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/></svg>
-                    <div class="header-title">
-                        <h1>PATAGONIA <span>DIRECTOR</span></h1>
-                    </div>
+                    <div class="header-title"><h1>PATAGONIA <span>TREKKING</span></h1></div>
                 </div>
-                <div class="current-date-text" id="currentDateText" style="font-size: 0.8rem; color: #888; font-weight: 600;"></div>
+                <button class="settings-btn" onclick="openSettings()">
+                    <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z"/></svg>
+                </button>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="stat-card"><h3>DÍAS RESTANTES</h3><p id="daysLeft">...</p></div>
+                <div class="stat-card"><h3>ENTRENOS COMPLETOS</h3><p id="completedCount">0</p></div>
+                <div class="stat-card"><h3>FASE ACTUAL</h3><p id="currentPhaseLabel" style="font-size: 0.9rem; line-height: 1.1rem; color: var(--primary)">...</p></div>
             </div>
 
             <div class="control-panel">
                 <div class="phases-bar">
                     <button class="phase-btn active" onclick="setPhaseFilter('all', this)">VER TODO</button>
-                    <button class="phase-btn" onclick="setPhaseFilter(1, this)">FASE 1: BASE</button>
-                    <button class="phase-btn" onclick="setPhaseFilter(2, this)">FASE 2: FUERZA</button>
-                    <button class="phase-btn" onclick="setPhaseFilter(3, this)">FASE 3: RESISTENCIA</button>
+                    <button class="phase-btn" onclick="setPhaseFilter(1, this)">FASE 1</button>
+                    <button class="phase-btn" onclick="setPhaseFilter(2, this)">FASE 2</button>
+                    <button class="phase-btn" onclick="setPhaseFilter(3, this)">FASE 3</button>
                 </div>
                 
-                <div class="types-bar">
-                    <button class="type-btn active" onclick="setTypeFilter('all', this)">
-                        <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
-                        TODOS
+                <div class="filter-dropdown-container">
+                    <button class="filter-trigger-btn" onclick="toggleFilterMenu()">
+                        <span id="filterLabel">
+                            <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+                            TODOS
+                        </span>
+                        <span>▼</span>
                     </button>
-                    <button class="type-btn" onclick="setTypeFilter('cerro', this)">
-                        <svg viewBox="0 0 24 24"><path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/></svg>
-                        CERRO
-                    </button>
-                    <button class="type-btn" onclick="setTypeFilter('gym', this)">
-                        <svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 5.57 2 7.71 3.43 9.14 2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 18.43 22 16.29z"/></svg>
-                        GYM
-                    </button>
-                    <button class="type-btn" onclick="setTypeFilter('cardio', this)">
-                        <svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
-                        CARDIO
-                    </button>
-                    <button class="type-btn" onclick="setTypeFilter('rest', this)">
-                        <svg viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                        RELAX
-                    </button>
+                    <div id="filterMenu" class="filter-menu">
+                        <button class="filter-option selected" onclick="setTypeFilter('all', this, 'TODOS')">
+                            <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg> TODOS
+                        </button>
+                        <button class="filter-option" onclick="setTypeFilter('cerro', this, 'CERRO')">
+                            <svg viewBox="0 0 24 24"><path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/></svg> CERRO
+                        </button>
+                        <button class="filter-option" onclick="setTypeFilter('gym', this, 'GYM')">
+                            <svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 5.57 2 7.71 3.43 9.14 2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 18.43 22 16.29z"/></svg> GYM
+                        </button>
+                        <button class="filter-option" onclick="setTypeFilter('cardio', this, 'CARDIO')">
+                            <svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg> CARDIO
+                        </button>
+                        <button class="filter-option" onclick="setTypeFilter('rest', this, 'RELAX')">
+                            <svg viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> RELAX
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="scroll-content">
-            <div class="dashboard-grid">
-                <div class="stat-card">
-                    <h3>DÍAS RESTANTES</h3>
-                    <p id="daysLeft">0</p>
-                </div>
-                <div class="stat-card">
-                    <h3>SESIONES LISTAS</h3>
-                    <p id="completedCount">0</p>
-                </div>
-                <div class="stat-card">
-                    <h3>FASE ACTUAL</h3>
-                    <p id="currentPhaseLabel" style="font-size: 1.2rem; line-height: 2.1rem; color: var(--primary)">...</p>
-                </div>
-            </div>
-
-            <main id="main-container">
-                </main>
+            <div id="main-container"></div>
         </div>
-
     </div>
 
     <div id="modal" class="modal">
@@ -294,22 +313,41 @@
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
             <div style="margin-bottom: 20px;">
-                <h3 id="modalTitle" style="color: white; margin-bottom: 10px; font-family: 'Montserrat'; font-weight:800;">ACTIVIDAD</h3>
-                <p id="modalDescription" style="color: #aaa; line-height: 1.5; font-size: 0.95rem;">Detalle...</p>
+                <h3 id="modalTitle" style="color: white; margin-bottom: 10px;">ACTIVIDAD</h3>
+                <p id="modalDescription" style="color: #aaa; line-height: 1.5; font-size: 0.9rem;">Detalle...</p>
                 <div class="coach-note">
-                    <small>NOTA DEL DIRECTOR:</small>
-                    <p id="modalNote">Consejo...</p>
+                    <small style="color:var(--primary); font-weight:bold;">CONSEJO:</small>
+                    <p id="modalNote" style="margin:5px 0 0 0; color:#ddd; font-style:italic;">...</p>
                 </div>
+                <textarea id="journalInput" class="journal-input" placeholder="Bitácora (ej. Me sentí bien...)"></textarea>
             </div>
             <button id="completeBtn" class="action-btn btn-complete" onclick="toggleComplete()">MARCAR COMPLETADO</button>
         </div>
     </div>
 
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>AJUSTES</h2>
+                <button class="close-btn" onclick="closeSettings()">&times;</button>
+            </div>
+            <div class="settings-option">
+                <div><h4>Exportar Datos</h4></div>
+                <button class="btn-small" onclick="exportData()">GUARDAR</button>
+            </div>
+            <div class="settings-option">
+                <div><h4>Importar Datos</h4></div>
+                <button class="btn-small" onclick="document.getElementById('fileInput').click()">CARGAR</button>
+                <input type="file" id="fileInput" accept=".json" onchange="importData(this)" style="display:none">
+            </div>
+        </div>
+    </div>
+
     <script>
-        const startDate = new Date(2026, 0, 6); // Enero 6 (Martes)
-        const tripDate = new Date(2026, 10, 1); // Nov 1
+        const startDate = new Date(2026, 0, 6);
+        const tripDate = new Date(2026, 10, 1);
         
-        let completedDays = JSON.parse(localStorage.getItem('patagoniaMotionDB')) || [];
+        let trackingData = JSON.parse(localStorage.getItem('patagoniaFinal_v6')) || {};
         let filterPhase = 'all';
         let filterType = 'all';
         let selectedDateId = null;
@@ -317,15 +355,15 @@
         const phases = [
             { id: 1, name: "FASE 1: BASE", endMonth: 2 },
             { id: 2, name: "FASE 2: FUERZA", endMonth: 6 },
-            { id: 3, name: "FASE 3: RESISTENCIA", endMonth: 9 },
+            { id: 3, name: "FASE 3: RESIST", endMonth: 9 },
             { id: 4, name: "TAPERING", endMonth: 10 }
         ];
 
         const routines = {
-            1: { title: "Relax / Yoga", type: "rest", icon: "icon-rest", desc: "Estiramiento o caminata muy suave.", note: "Recuperación activa." },
-            2: { title: "Cardio Z2", type: "cardio", icon: "icon-cardio", desc: "40 min trote suave (puedes hablar).", note: "Base aeróbica." },
-            3: { title: "Gym Pierna", type: "gym", icon: "icon-gym", desc: "Sentadillas y Lunges. Resistencia.", note: "Piensa en el Fitz Roy." },
-            4: { title: "Intervalos", type: "cardio", icon: "icon-cardio", desc: "30 min cambios de ritmo o Escaladora.", note: "Ganando aire." },
+            1: { title: "Relax / Yoga", type: "rest", icon: "icon-rest", desc: "Estiramiento o caminata suave.", note: "Recuperación activa." },
+            2: { title: "Cardio Z2", type: "cardio", icon: "icon-cardio", desc: "40 min trote suave.", note: "Base aeróbica." },
+            3: { title: "Gym Pierna", type: "gym", icon: "icon-gym", desc: "Sentadillas y Lunges.", note: "Piensa en el Fitz Roy." },
+            4: { title: "Intervalos", type: "cardio", icon: "icon-cardio", desc: "30 min cambios de ritmo.", note: "Ganando aire." },
             5: { title: "Descanso Total", type: "rest", icon: "icon-rest", desc: "Dormir bien y comer.", note: "El músculo crece hoy." },
             6: { title: "Día de Cerro", type: "cerro", icon: "icon-cerro", desc: "Salida a ruta.", note: "Conexión total." },
             0: { title: "Cerro / Relax", type: "cerro", icon: "icon-cerro", desc: "Opción B de montaña.", note: "Disfruta." }
@@ -333,14 +371,31 @@
 
         function enterApp() {
             document.getElementById('landing-page').classList.add('hidden');
-            setTimeout(() => document.getElementById('app-container').classList.add('visible'), 300);
-            init();
+            document.getElementById('app-container').classList.add('visible');
         }
 
-        function init() {
-            document.getElementById('currentDateText').innerText = new Date().toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long'}).toUpperCase();
+        // Auto-run
+        (function() {
             renderCalendar();
             updateStats();
+        })();
+
+        // --- DROPDOWN LOGIC ---
+        function toggleFilterMenu() {
+            document.getElementById('filterMenu').classList.toggle('show');
+        }
+        
+        // Cierra el menú si haces clic fuera
+        window.onclick = function(event) {
+            if (!event.target.matches('.filter-trigger-btn') && !event.target.closest('.filter-trigger-btn')) {
+                var dropdowns = document.getElementsByClassName("filter-menu");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
         }
 
         function getPhase(date) {
@@ -361,8 +416,8 @@
 
             while (currentDate <= tripDate) {
                 const month = currentDate.getMonth();
-                
-                // Nuevo bloque mensual
+                const phase = getPhase(currentDate);
+
                 if (month !== currentMonth) {
                     currentMonth = month;
                     const monthBlock = document.createElement('div');
@@ -370,10 +425,9 @@
                     
                     const monthTitle = document.createElement('div');
                     monthTitle.className = 'month-header';
-                    monthTitle.innerText = currentDate.toLocaleDateString('es-MX', {month: 'long', year: 'numeric'}).toUpperCase();
+                    monthTitle.innerText = currentDate.toLocaleDateString('es-MX', {month: 'long', year: 'numeric'});
                     monthBlock.appendChild(monthTitle);
 
-                    // Headers L M M J V S D
                     if (filterType === 'all') {
                         const headerRow = document.createElement('div');
                         headerRow.className = 'calendar-grid';
@@ -393,10 +447,10 @@
                     monthBlock.appendChild(monthGrid);
                     container.appendChild(monthBlock);
 
-                    // Padding para alineación
+                    // Padding inicial para alinear días
                     if (filterType === 'all') {
                         let dayIndex = currentDate.getDay(); 
-                        let visualIndex = (dayIndex === 0) ? 6 : dayIndex - 1;
+                        let visualIndex = (dayIndex === 0) ? 6 : dayIndex - 1; 
                         for(let i=0; i<visualIndex; i++) {
                             const empty = document.createElement('div');
                             empty.className = 'day-card empty';
@@ -405,14 +459,11 @@
                     }
                 }
 
-                // Generar tarjeta
                 const dateId = currentDate.toISOString().split('T')[0];
                 const dayOfWeek = currentDate.getDay();
-                const phase = getPhase(currentDate);
                 const routine = routines[dayOfWeek];
-                const isCompleted = completedDays.includes(dateId);
+                const entry = trackingData[dateId];
                 
-                // Filtros
                 let showCard = true;
                 if (filterPhase !== 'all' && phase.id != filterPhase) showCard = false;
                 if (filterType !== 'all' && routine.type !== filterType) showCard = false;
@@ -420,10 +471,11 @@
                 if (showCard) {
                     const card = document.createElement('div');
                     card.className = 'day-card';
-                    if (isCompleted) card.classList.add('completed');
+                    if (entry && entry.completed) card.classList.add('completed');
+                    if (entry && entry.note) card.classList.add('has-note');
                     
                     card.onclick = () => openModal(dateId, dayOfWeek, phase, routine);
-
+                    
                     const svgHtml = document.getElementById(routine.icon).innerHTML;
                     
                     card.innerHTML = `
@@ -438,10 +490,14 @@
                 currentDate.setDate(currentDate.getDate() + 1);
             }
             
-            // Ocultar meses vacíos
+            // LÓGICA ANTI-FANTASMA (Corrige lo de la captura de pantalla)
             document.querySelectorAll('.month-block').forEach(block => {
-                const visibleCards = block.querySelectorAll('.day-card:not(.empty)').length;
-                if(visibleCards === 0) block.style.display = 'none';
+                const hasCards = block.querySelectorAll('.day-card:not(.empty)').length > 0;
+                if (!hasCards) {
+                    block.style.display = 'none';
+                } else {
+                    block.style.display = 'block';
+                }
             });
         }
 
@@ -452,34 +508,43 @@
             renderCalendar();
         }
 
-        function setTypeFilter(val, btn) {
+        function setTypeFilter(val, btnElement, label) {
             filterType = val;
-            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            
+            // Actualizar Label del Dropdown
+            const iconSvg = btnElement.querySelector('svg').outerHTML;
+            document.getElementById('filterLabel').innerHTML = iconSvg + " " + label;
+
+            // Actualizar estado visual del menú
+            document.querySelectorAll('.filter-option').forEach(b => b.classList.remove('selected'));
+            btnElement.classList.add('selected');
+            
             renderCalendar();
         }
 
         function openModal(dateStr, dayOfWeek, phase, routine) {
             selectedDateId = dateStr;
-            const isCompleted = completedDays.includes(dateStr);
+            const entry = trackingData[dateStr];
             document.getElementById('modal').style.display = 'flex';
             
-            const d = new Date(dateStr + "T00:00:00");
+            const parts = dateStr.split('-');
+            const d = new Date(parts[0], parts[1]-1, parts[2]); 
+            
             document.getElementById('modalDate').innerText = d.toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long'}).toUpperCase();
             document.getElementById('modalTitle').innerText = routine.title;
             
             let desc = routine.desc;
             if (routine.type === 'cerro') {
-                if (phase.id === 1) desc = "Cerro San Juan (Mitad) o La Cruz. Sin peso extra. Ritmo constante.";
-                if (phase.id === 2) desc = "Cerro San Juan Completo. IMPORTANTE: Botas nuevas y mochila 4kg.";
+                if (phase.id === 1) desc = "Cerro San Juan (Mitad) o La Cruz. Sin peso extra.";
+                if (phase.id === 2) desc = "Cerro San Juan Completo. Botas nuevas y mochila 4kg.";
                 if (phase.id === 3) desc = "Ruta Larga (10km+). Mochila peso real (8kg).";
-                if (phase.id === 4) desc = "Caminata ligera en plano. Cuidando tobillos.";
             }
             document.getElementById('modalDescription').innerText = desc;
             document.getElementById('modalNote').innerText = routine.note;
+            document.getElementById('journalInput').value = entry ? (entry.note || "") : "";
 
             const btn = document.getElementById('completeBtn');
-            if(isCompleted) {
+            if(entry && entry.completed) {
                 btn.innerText = "DESMARCAR";
                 btn.className = "action-btn btn-undo";
             } else {
@@ -489,25 +554,60 @@
         }
 
         function toggleComplete() {
-            if(completedDays.includes(selectedDateId)) {
-                completedDays = completedDays.filter(d => d !== selectedDateId);
+            const note = document.getElementById('journalInput').value;
+            if (trackingData[selectedDateId] && trackingData[selectedDateId].completed) {
+                delete trackingData[selectedDateId];
             } else {
-                completedDays.push(selectedDateId);
+                trackingData[selectedDateId] = { completed: true, note: note };
             }
-            localStorage.setItem('patagoniaMotionDB', JSON.stringify(completedDays));
+            localStorage.setItem('patagoniaFinal_v6', JSON.stringify(trackingData));
             closeModal();
-            renderCalendar(); 
+            renderCalendar();
             updateStats();
         }
 
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        function openSettings() { document.getElementById('settingsModal').style.display = 'flex'; }
+        function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(trackingData));
+            const anchor = document.createElement('a');
+            anchor.setAttribute("href", dataStr);
+            anchor.setAttribute("download", "patagonia_backup.json");
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    trackingData = JSON.parse(e.target.result);
+                    localStorage.setItem('patagoniaFinal_v6', JSON.stringify(trackingData));
+                    alert("Datos cargados.");
+                    closeSettings();
+                    renderCalendar();
+                    updateStats();
+                } catch(err) { alert("Error en archivo."); }
+            };
+            reader.readAsText(file);
+        }
 
         function updateStats() {
             const today = new Date();
-            const diffTime = tripDate - today;
-            const diffDays = Math.ceil(diffTime > 0 ? diffTime / (1000 * 60 * 60 * 24) : 0);
-            document.getElementById('daysLeft').innerText = diffDays;
-            document.getElementById('completedCount').innerText = completedDays.length;
+            today.setHours(0,0,0,0);
+            const trip = new Date(tripDate);
+            trip.setHours(0,0,0,0);
+            
+            const oneDay = 24 * 60 * 60 * 1000;
+            const diffDays = Math.round((trip - today) / oneDay);
+            
+            document.getElementById('daysLeft').innerText = diffDays > 0 ? diffDays : 0;
+            document.getElementById('completedCount').innerText = Object.keys(trackingData).length;
             document.getElementById('currentPhaseLabel').innerText = getPhase(today).name;
         }
     </script>
