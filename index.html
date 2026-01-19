@@ -3,613 +3,466 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Patagonia 2026</title>
+    <title>PATAGONIA 2026 | DASHBOARD</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#121212">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a0a">
     
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Russo+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23FF5722%22><path d=%22M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z%22/></svg>">
 
     <style>
         :root {
-            --primary: #FF5722;
-            --bg-main: #121212;
+            /* UX COLORS */
+            --primary: #FF3D00; /* Naranja más agresivo */
+            --bg-main: #050505;
+            --bg-surface: #141414;
             --bg-card: #1E1E1E;
-            --text-white: #ffffff;
-            --text-gray: #90A4AE;
-            --success: #76FF03;
-            --font-head: 'Russo One', sans-serif;
-            --font-body: 'Montserrat', sans-serif;
+            --text-main: #E0E0E0;
+            --text-muted: #757575;
+            --success: #00E676; /* Verde neón para feedback positivo */
+            --danger: #FF1744;
+            
+            /* UI VARIABLES */
+            --radius: 12px;
+            --header-h: 160px;
+            --font-display: 'Montserrat', sans-serif;
+            --font-data: 'JetBrains Mono', monospace; /* Para datos, monoespaciada es mejor */
         }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body, html {
             margin: 0; padding: 0;
             background-color: var(--bg-main);
-            color: var(--text-white);
-            font-family: var(--font-body);
-            -webkit-tap-highlight-color: transparent;
+            color: var(--text-main);
+            font-family: var(--font-display);
             overflow-x: hidden;
+            height: 100%;
         }
 
-        /* --- LANDING PAGE --- */
-        #landing-page {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #263238 0%, #000000 100%);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 9999; transition: opacity 0.6s ease, visibility 0.6s ease;
-        }
-        #landing-page.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        
-        .logo-icon-lg { width: 90px; height: 90px; fill: var(--primary); margin-bottom: 25px; filter: drop-shadow(0 0 15px rgba(255,87,34,0.6)); animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0% {transform: translateY(0px);} 50% {transform: translateY(-10px);} 100% {transform: translateY(0px);} }
-        .landing-title { font-family: var(--font-head); font-size: 2.5rem; text-align: center; line-height: 1.1; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 1px; }
-        .landing-title span { color: var(--primary); }
-        .start-btn { padding: 16px 50px; background: transparent; color: white; border: 2px solid var(--primary); font-family: var(--font-head); font-size: 1.2rem; cursor: pointer; border-radius: 50px; transition: all 0.3s; letter-spacing: 2px; text-transform: uppercase; }
-        .start-btn:active { transform: scale(0.95); background: var(--primary); }
-
-        /* --- MAIN APP --- */
-        #app-container { opacity: 0; transition: opacity 0.8s ease; }
-        #app-container.visible { opacity: 1; }
-
-        /* Sticky Header */
+        /* --- UI: GLASS HEADER --- */
         .sticky-wrapper {
             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            background: rgba(18, 18, 18, 0.98);
-            border-bottom: 1px solid #333;
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
             padding: 15px 20px 10px 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
-            padding-top: env(safe-area-inset-top, 15px);
+            padding-top: env(safe-area-inset-top, 20px);
         }
 
-        .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .header-brand { display: flex; align-items: center; gap: 10px; }
-        .logo-icon-sm { width: 30px; height: 30px; fill: var(--primary); }
-        .header-title h1 { font-family: var(--font-head); font-size: 1.1rem; margin: 0; line-height: 1; letter-spacing: 0.5px; }
-        .header-title span { color: var(--primary); }
-        .settings-btn { background: none; border: none; cursor: pointer; padding: 0; }
-        .settings-btn svg { width: 24px; height: 24px; fill: #555; transition: 0.3s; }
-        .settings-btn:hover svg { fill: white; transform: rotate(90deg); }
-
-        /* Stats HUD */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
-        .stat-card { background: #252525; padding: 8px 5px; border-radius: 6px; text-align: center; border-bottom: 2px solid var(--primary); display: flex; flex-direction: column; justify-content: center; }
-        .stat-card h3 { font-size: 0.55rem; color: #999; margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-card p { font-family: var(--font-head); font-size: 1.1rem; margin: 0; color: white; line-height: 1; }
-
-        /* --- NUEVO CONTROL PANEL (Fases + Dropdown) --- */
-        .control-panel { 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; /* Fases a la izq, Filtro a la der */
-            gap: 10px;
-            padding-top: 5px;
-        }
-
-        /* Fases (Scroll horizontal si es necesario) */
-        .phases-bar { display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; }
-        .phase-btn { background: #333; color: #888; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.65rem; white-space: nowrap; transition: 0.2s;}
-        .phase-btn.active { background: var(--primary); color: white; }
-
-        /* --- DROPDOWN PERSONALIZADO --- */
-        .filter-dropdown-container {
-            position: relative;
-            min-width: 140px; /* Ancho fijo para el botón */
-        }
-
-        .filter-trigger-btn {
-            width: 100%;
-            background: #252525;
-            border: 1px solid #444;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 0.7rem;
-            font-weight: 700;
-            transition: 0.2s;
-        }
-        .filter-trigger-btn span { display: flex; align-items: center; gap: 6px; }
-        .filter-trigger-btn svg { width: 14px; height: 14px; fill: var(--primary); }
-        .filter-trigger-btn:active { transform: scale(0.98); }
-
-        /* Menú Oculto */
-        .filter-menu {
-            position: absolute;
-            top: 110%; right: 0;
-            width: 160px;
-            background: rgba(30, 30, 30, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid #444;
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            padding: 5px;
-            display: none; /* Oculto por defecto */
-            flex-direction: column;
-            gap: 2px;
-            z-index: 2000;
-            animation: slideDownMenu 0.2s ease forwards;
-        }
-        @keyframes slideDownMenu { from {opacity:0; transform: translateY(-10px);} to {opacity:1; transform: translateY(0);} }
-
-        .filter-menu.show { display: flex; }
-
-        .filter-option {
-            background: transparent;
-            border: none;
-            color: #aaa;
-            padding: 10px;
-            text-align: left;
-            cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: 600;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.2s;
-        }
-        .filter-option svg { width: 16px; height: 16px; fill: #666; transition: 0.2s; }
-        .filter-option:hover { background: rgba(255, 255, 255, 0.05); color: white; }
-        .filter-option:hover svg { fill: white; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .brand { display: flex; align-items: center; gap: 10px; }
+        .brand svg { width: 28px; fill: var(--primary); }
+        .brand h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
+        .brand span { color: var(--primary); }
         
-        .filter-option.selected { background: rgba(255, 87, 34, 0.15); color: var(--primary); }
-        .filter-option.selected svg { fill: var(--primary); }
+        .settings-btn svg { width: 22px; fill: var(--text-muted); transition: 0.3s; }
+        .settings-btn:active svg { fill: var(--text-main); transform: rotate(90deg); }
 
-        /* --- SCROLL CONTENT --- */
-        .scroll-content {
-            padding-top: 230px; /* Ajustado para el nuevo header */
-            padding-left: 15px; padding-right: 15px; padding-bottom: 80px;
-            max-width: 1000px; margin: 0 auto;
-        }
+        /* --- UX: DATA VISUALIZATION --- */
+        .progress-container { margin-bottom: 15px; }
+        .progress-labels { display: flex; justify-content: space-between; font-family: var(--font-data); font-size: 0.7rem; color: var(--text-muted); margin-bottom: 5px; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #333; border-radius: 10px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 1s cubic-bezier(0.22, 1, 0.36, 1); box-shadow: 0 0 10px rgba(255, 61, 0, 0.5); }
 
-        .month-block { margin-bottom: 30px; }
-        .month-header { 
-            color: var(--primary); font-family: var(--font-head); font-size: 1.1rem; 
-            margin-bottom: 10px; border-left: 4px solid var(--primary); padding-left: 10px;
-            text-transform: uppercase;
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .stat-item { background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px; text-align: center; }
+        .stat-label { font-size: 0.6rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-family: var(--font-data); font-size: 1rem; font-weight: 700; color: white; margin-top: 2px; }
+
+        /* --- UX: CONTROLS --- */
+        .controls { display: flex; gap: 10px; margin-top: 15px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .pill-btn { 
+            background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); 
+            color: var(--text-muted); padding: 6px 14px; border-radius: 20px; 
+            font-size: 0.7rem; font-weight: 600; white-space: nowrap; transition: 0.2s;
         }
+        .pill-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* --- UI: CALENDAR GRID --- */
+        .scroll-content { padding-top: 220px; padding-bottom: 100px; padding-left: 12px; padding-right: 12px; max-width: 800px; margin: 0 auto; }
+        
+        .month-section { margin-bottom: 30px; }
+        .month-title { 
+            font-size: 0.9rem; font-weight: 800; color: var(--text-muted); margin-bottom: 10px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;
+        }
+        .month-stats { font-family: var(--font-data); font-size: 0.7rem; color: var(--primary); }
 
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        .calendar-grid.filtered-mode { display: flex; flex-wrap: wrap; gap: 8px; }
-        
-        .day-header { text-align: center; font-size: 0.6rem; color: #555; font-weight: 800; padding-bottom: 5px; }
+        .day-header { text-align: center; font-size: 0.6rem; color: #444; font-weight: 700; margin-bottom: 5px; }
 
-        .day-card { 
-            background: var(--bg-card); border-radius: 6px; padding: 8px 4px; min-height: 85px; 
-            cursor: pointer; position: relative; display: flex; flex-direction: column; 
-            align-items: center; justify-content: space-between; border: 1px solid transparent;
-            transition: transform 0.2s;
+        .day-card {
+            background: var(--bg-card);
+            border-radius: 8px;
+            aspect-ratio: 0.8; /* Mantiene proporción vertical */
+            position: relative;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: transform 0.1s, background 0.2s;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         .day-card:active { transform: scale(0.95); }
-        .day-card.completed { border-color: var(--success); background: #1a2e1e; }
-        .day-card.completed svg { fill: var(--success) !important; }
-        .day-card.completed .activity-name { color: var(--success); }
-        .day-card.has-note::after { content: ''; position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; background: white; border-radius: 50%; }
-
-        .day-phase { position: absolute; top: 0; left: 0; font-size: 0.5rem; background: #333; color: #aaa; padding: 2px 4px; border-bottom-right-radius: 4px; }
-        .day-date { font-size: 0.6rem; color: #555; font-weight: 700; align-self: flex-end; margin-right: 2px; }
-        .activity-icon { width: 24px; height: 24px; fill: #607D8B; margin-top: 4px; }
-        .activity-name { font-size: 0.6rem; text-align: center; color: white; line-height: 1.1; margin-bottom: 2px;}
         
-        .day-card.empty { background: transparent; border: none; pointer-events: none; }
-        .calendar-grid.filtered-mode .day-card { width: 90px; }
+        /* ESTADOS CRÍTICOS */
+        .day-card.today { 
+            border: 1px solid var(--primary); 
+            background: rgba(255, 61, 0, 0.05);
+            box-shadow: 0 0 15px rgba(255, 61, 0, 0.2);
+            animation: pulse border 2s infinite;
+        }
+        
+        .day-card.completed { background: #102915; border-color: #1b5e20; }
+        .day-card.completed svg { fill: var(--success); }
+        .day-card.missed { background: rgba(255, 23, 68, 0.1); }
 
-        /* MODALS */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; }
-        .modal-content { background: #1a1a1a; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; border: 1px solid #444; max-height: 90vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .modal-header h2 { color: var(--primary); margin: 0; font-family: var(--font-head); font-size: 1.3rem; }
-        .close-btn { background: none; border: none; color: #777; font-size: 1.5rem; cursor: pointer; }
-        .coach-note { background: #111; padding: 10px; border-radius: 6px; border-left: 3px solid var(--primary); margin-bottom: 20px; }
-        .journal-input { width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 6px; margin-bottom: 15px; box-sizing: border-box; font-family: sans-serif; resize: vertical; min-height: 80px;}
-        .action-btn { width: 100%; padding: 15px; border: none; border-radius: 6px; font-family: var(--font-head); font-size: 1rem; cursor: pointer; text-transform: uppercase; }
-        .btn-complete { background: var(--success); color: #000; }
-        .btn-undo { background: #333; color: #ccc; }
+        .day-num { position: absolute; top: 4px; right: 5px; font-family: var(--font-data); font-size: 0.6rem; color: #555; }
+        .day-icon { width: 20px; height: 20px; fill: #555; margin-bottom: 4px; }
+        .day-label { font-size: 0.55rem; color: #888; text-transform: uppercase; font-weight: 700; display: none; } /* Oculto en grid para limpieza visual */
+        
+        /* Indicador de Nota */
+        .has-note::after { content:''; position: absolute; bottom: 4px; width: 4px; height: 4px; background: white; border-radius: 50%; }
 
-        /* SETTINGS MODAL */
-        #settingsModal .settings-option { background: #222; padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-small { background: var(--primary); color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.8rem; }
+        /* --- MODAL: MISSION BRIEFING --- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; justify-content: center; align-items: end; }
+        .modal-card { 
+            background: #1a1a1a; width: 100%; max-width: 500px; 
+            border-top-left-radius: 20px; border-top-right-radius: 20px; 
+            padding: 25px; border-top: 1px solid #333; 
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideUp { from {transform: translateY(100%);} to {transform: translateY(0);} }
 
-        @media (max-width: 600px) {
-            .scroll-content { padding-top: 240px; padding-left: 5px; padding-right: 5px; }
-            .calendar-grid { grid-template-columns: repeat(7, minmax(35px, 1fr)); gap: 3px; }
-            .day-card { min-height: 55px; padding: 2px; }
-            .activity-icon { width: 18px; height: 18px; }
-            .activity-name { display: none; }
-            .day-phase { display: none; }
-            .calendar-grid.filtered-mode .day-card { width: 48%; min-height: 90px; }
-            .calendar-grid.filtered-mode .activity-name { display: block; }
-            .landing-title { font-size: 2.2rem; }
-            /* header elements */
-            .main-header { margin-bottom: 5px; }
-            .dashboard-grid { margin-bottom: 5px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-date { font-family: var(--font-data); color: var(--text-muted); font-size: 0.8rem; }
+        .modal-title { font-size: 1.5rem; font-weight: 800; margin: 0; line-height: 1.1; color: white; }
+        
+        .coach-block { background: rgba(255, 61, 0, 0.1); border-left: 3px solid var(--primary); padding: 15px; margin: 15px 0; border-radius: 0 8px 8px 0; }
+        .coach-label { color: var(--primary); font-size: 0.7rem; font-weight: 800; letter-spacing: 1px; display: block; margin-bottom: 5px; }
+        .coach-text { color: #ddd; font-size: 0.9rem; line-height: 1.4; font-style: italic; }
+
+        textarea { width: 100%; background: #000; border: 1px solid #333; color: white; padding: 15px; border-radius: 8px; font-family: sans-serif; resize: none; height: 80px; margin-bottom: 15px; }
+        textarea:focus { outline: none; border-color: var(--primary); }
+
+        .btn-main { width: 100%; background: var(--text-main); color: black; border: none; padding: 18px; font-weight: 800; font-size: 1rem; border-radius: 12px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-main.completed-state { background: #1b5e20; color: var(--success); border: 1px solid var(--success); }
+
+        @media (min-width: 600px) {
+            .modal-overlay { align-items: center; }
+            .modal-card { border-radius: 20px; }
+            .day-card { aspect-ratio: 1; }
+            .day-label { display: block; }
         }
     </style>
 </head>
 <body>
 
-    <div style="display: none;">
-        <svg id="icon-cerro" viewBox="0 0 24 24"><path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/></svg>
-        <svg id="icon-gym" viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 5.57 2 7.71 3.43 9.14 2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 18.43 22 16.29z"/></svg>
-        <svg id="icon-cardio" viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
-        <svg id="icon-rest" viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-        <svg id="icon-filter" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
-    </div>
+    <svg style="display:none">
+        <defs>
+            <symbol id="icon-gym" viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 5.57 2 7.71 3.43 9.14 2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 18.43 22 16.29z"/></symbol>
+            <symbol id="icon-cardio" viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></symbol>
+            <symbol id="icon-mount" viewBox="0 0 24 24"><path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/></symbol>
+            <symbol id="icon-rest" viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></symbol>
+            <symbol id="icon-core" viewBox="0 0 24 24"><path d="M20.5,11H3.5C2.67,11,2,11.67,2,12.5v0c0,0.83,0.67,1.5,1.5,1.5h17c0.83,0,1.5-0.67,1.5-1.5v0 C22,11.67,21.33,11,20.5,11z M12,6c-1.66,0-3,1.34-3,3s1.34,3,3,3s3-1.34,3-3S13.66,6,12,6z M12,16c-2.33,0-7,1.17-7,3.5V21h14 v-1.5C19,17.17,14.33,16,12,16z"/></symbol>
+        </defs>
+    </svg>
 
-    <div id="landing-page">
-        <svg class="logo-icon-lg" viewBox="0 0 24 24"><path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/></svg>
-        <div class="landing-title">PATAGONIA<br><span>TREKKING 2026</span></div>
-        <button class="start-btn" onclick="enterApp()">INGRESAR</button>
-    </div>
-
-    <div id="app-container">
-        <div class="sticky-wrapper">
-            <div class="main-header">
-                <div class="header-brand">
-                    <svg class="logo-icon-sm" viewBox="0 0 24 24"><path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/></svg>
-                    <div class="header-title"><h1>PATAGONIA <span>TREKKING</span></h1></div>
-                </div>
-                <button class="settings-btn" onclick="openSettings()">
-                    <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z"/></svg>
-                </button>
+    <div class="sticky-wrapper">
+        <div class="header-top">
+            <div class="brand">
+                <svg viewBox="0 0 24 24"><use href="#icon-mount"></use></svg>
+                <h1>PATAGONIA <span>26</span></h1>
             </div>
-
-            <div class="dashboard-grid">
-                <div class="stat-card"><h3>DÍAS RESTANTES</h3><p id="daysLeft">...</p></div>
-                <div class="stat-card"><h3>ENTRENOS COMPLETOS</h3><p id="completedCount">0</p></div>
-                <div class="stat-card"><h3>FASE ACTUAL</h3><p id="currentPhaseLabel" style="font-size: 0.9rem; line-height: 1.1rem; color: var(--primary)">...</p></div>
-            </div>
-
-            <div class="control-panel">
-                <div class="phases-bar">
-                    <button class="phase-btn active" onclick="setPhaseFilter('all', this)">VER TODO</button>
-                    <button class="phase-btn" onclick="setPhaseFilter(1, this)">FASE 1</button>
-                    <button class="phase-btn" onclick="setPhaseFilter(2, this)">FASE 2</button>
-                    <button class="phase-btn" onclick="setPhaseFilter(3, this)">FASE 3</button>
-                </div>
-                
-                <div class="filter-dropdown-container">
-                    <button class="filter-trigger-btn" onclick="toggleFilterMenu()">
-                        <span id="filterLabel">
-                            <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
-                            TODOS
-                        </span>
-                        <span>▼</span>
-                    </button>
-                    <div id="filterMenu" class="filter-menu">
-                        <button class="filter-option selected" onclick="setTypeFilter('all', this, 'TODOS')">
-                            <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg> TODOS
-                        </button>
-                        <button class="filter-option" onclick="setTypeFilter('cerro', this, 'CERRO')">
-                            <svg viewBox="0 0 24 24"><path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/></svg> CERRO
-                        </button>
-                        <button class="filter-option" onclick="setTypeFilter('gym', this, 'GYM')">
-                            <svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 5.57 2 7.71 3.43 9.14 2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 18.43 22 16.29z"/></svg> GYM
-                        </button>
-                        <button class="filter-option" onclick="setTypeFilter('cardio', this, 'CARDIO')">
-                            <svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg> CARDIO
-                        </button>
-                        <button class="filter-option" onclick="setTypeFilter('rest', this, 'RELAX')">
-                            <svg viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> RELAX
-                        </button>
-                    </div>
-                </div>
+            <div class="settings-btn" onclick="exportData()">
+                <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
             </div>
         </div>
 
-        <div class="scroll-content">
-            <div id="main-container"></div>
+        <div class="progress-container">
+            <div class="progress-labels">
+                <span>CONSISTENCIA</span>
+                <span id="progressText">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div id="mainProgressBar" class="progress-bar-fill"></div>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="stat-label">Restantes</div>
+                <div class="stat-value" id="statDays">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Sesiones</div>
+                <div class="stat-value" id="statSessions">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Fase</div>
+                <div class="stat-value" style="color:var(--primary)">BASE</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="pill-btn active" onclick="filterBy('all', this)">TODO</button>
+            <button class="pill-btn" onclick="filterBy('cerro', this)">MONTAÑA</button>
+            <button class="pill-btn" onclick="filterBy('gym', this)">FUERZA</button>
+            <button class="pill-btn" onclick="filterBy('cardio', this)">CARDIO</button>
         </div>
     </div>
 
-    <div id="modal" class="modal">
-        <div class="modal-content">
+    <div id="calendarContainer" class="scroll-content">
+        </div>
+
+    <div id="modal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <h2 id="modalDate">FECHA</h2>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
+                <span class="modal-date" id="mDate">LUN 19 ENE</span>
+                <div id="mIcon" style="width:30px; height:30px; fill:var(--primary)"></div>
             </div>
-            <div style="margin-bottom: 20px;">
-                <h3 id="modalTitle" style="color: white; margin-bottom: 10px;">ACTIVIDAD</h3>
-                <p id="modalDescription" style="color: #aaa; line-height: 1.5; font-size: 0.9rem;">Detalle...</p>
-                <div class="coach-note">
-                    <small style="color:var(--primary); font-weight:bold;">CONSEJO:</small>
-                    <p id="modalNote" style="margin:5px 0 0 0; color:#ddd; font-style:italic;">...</p>
-                </div>
-                <textarea id="journalInput" class="journal-input" placeholder="Bitácora (ej. Me sentí bien...)"></textarea>
+            <h2 class="modal-title" id="mTitle">ACTIVIDAD</h2>
+            <p style="color:#888; margin-top:5px;" id="mDesc">Descripción técnica</p>
+            
+            <div class="coach-block">
+                <span class="coach-label">COACH DICE:</span>
+                <span class="coach-text" id="mNote">Instrucción clave.</span>
             </div>
-            <button id="completeBtn" class="action-btn btn-complete" onclick="toggleComplete()">MARCAR COMPLETADO</button>
-        </div>
-    </div>
 
-    <div id="settingsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>AJUSTES</h2>
-                <button class="close-btn" onclick="closeSettings()">&times;</button>
-            </div>
-            <div class="settings-option">
-                <div><h4>Exportar Datos</h4></div>
-                <button class="btn-small" onclick="exportData()">GUARDAR</button>
-            </div>
-            <div class="settings-option">
-                <div><h4>Importar Datos</h4></div>
-                <button class="btn-small" onclick="document.getElementById('fileInput').click()">CARGAR</button>
-                <input type="file" id="fileInput" accept=".json" onchange="importData(this)" style="display:none">
-            </div>
+            <textarea id="mInput" placeholder="Bitácora: Peso usado, dolor, sensación..."></textarea>
+            
+            <button id="mBtn" class="btn-main" onclick="toggleStatus()">MARCAR COMPLETADO</button>
         </div>
     </div>
 
     <script>
-        const startDate = new Date(2026, 0, 6);
-        const tripDate = new Date(2026, 10, 1);
-        
-        let trackingData = JSON.parse(localStorage.getItem('patagoniaFinal_v6')) || {};
-        let filterPhase = 'all';
-        let filterType = 'all';
-        let selectedDateId = null;
-
-        const phases = [
-            { id: 1, name: "FASE 1: BASE", endMonth: 2 },
-            { id: 2, name: "FASE 2: FUERZA", endMonth: 6 },
-            { id: 3, name: "FASE 3: RESIST", endMonth: 9 },
-            { id: 4, name: "TAPERING", endMonth: 10 }
-        ];
-
-        const routines = {
-            1: { title: "Relax / Yoga", type: "rest", icon: "icon-rest", desc: "Estiramiento o caminata suave.", note: "Recuperación activa." },
-            2: { title: "Cardio Z2", type: "cardio", icon: "icon-cardio", desc: "40 min trote suave.", note: "Base aeróbica." },
-            3: { title: "Gym Pierna", type: "gym", icon: "icon-gym", desc: "Sentadillas y Lunges.", note: "Piensa en el Fitz Roy." },
-            4: { title: "Intervalos", type: "cardio", icon: "icon-cardio", desc: "30 min cambios de ritmo.", note: "Ganando aire." },
-            5: { title: "Descanso Total", type: "rest", icon: "icon-rest", desc: "Dormir bien y comer.", note: "El músculo crece hoy." },
-            6: { title: "Día de Cerro", type: "cerro", icon: "icon-cerro", desc: "Salida a ruta.", note: "Conexión total." },
-            0: { title: "Cerro / Relax", type: "cerro", icon: "icon-cerro", desc: "Opción B de montaña.", note: "Disfruta." }
+        // --- CONFIGURACIÓN & DATA ---
+        // INICIO: 19 Enero 2026. FIN: 1 Noviembre 2026.
+        const CONFIG = {
+            start: new Date(2026, 0, 19), 
+            end: new Date(2026, 10, 1),
+            storageKey: 'patagonia_v8_titanium'
         };
 
-        function enterApp() {
-            document.getElementById('landing-page').classList.add('hidden');
-            document.getElementById('app-container').classList.add('visible');
-        }
+        // Estado Global
+        let store = JSON.parse(localStorage.getItem(CONFIG.storageKey)) || {};
+        let currentFilter = 'all';
+        let selectedDateKey = null;
 
-        // Auto-run
-        (function() {
+        // Rutinas adaptadas para "Catch Up" (Recuperar tiempo perdido)
+        const ROUTINES = {
+            1: { type: 'core', icon: '#icon-core', title: 'CORE & ACTIVACIÓN', desc: '40min. Planchas, Deadbugs y movilidad de cadera.', note: 'Es Lunes. Marca la pauta. Si tu core falla, tu espalda falla en la montaña.' },
+            2: { type: 'cardio', icon: '#icon-cardio', title: 'ZONA 2 CONSTANTE', desc: '50min Trote o Bici ritmo conversacional.', note: 'Aburrido pero efectivo. Construye capilares. No pases del 70% HR.' },
+            3: { type: 'gym', icon: '#icon-gym', title: 'FUERZA TREN INFERIOR', desc: 'Sentadilla, Peso Muerto, Zancadas. 4x10.', note: 'Hoy duelen las piernas. Carga peso real. No venimos a jugar.' },
+            4: { type: 'cardio', icon: '#icon-cardio', title: 'INTERVALOS VO2', desc: '30min: 2min fuerte / 2min suave.', note: 'Acostúmbrate a la falta de aire. Así se siente la altura.' },
+            5: { type: 'rest', icon: '#icon-rest', title: 'DESCANSO ACTIVO', desc: 'Caminata 30min + Estiramiento.', note: 'Come bien. Duerme 8h. El músculo crece hoy, no en el gym.' },
+            6: { type: 'cerro', icon: '#icon-mount', title: 'SALIDA TÉCNICA', desc: 'Ruta con desnivel. Botas puestas.', note: 'Prueba tu equipo. Ajusta la mochila. Siente el terreno.' },
+            0: { type: 'cerro', icon: '#icon-mount', title: 'VOLUMEN EXTRA', desc: 'Caminata larga o Bici suave.', note: 'Día para sumar kilómetros sin estrés. Disfruta.' }
+        };
+
+        // --- CORE FUNCTIONS ---
+
+        function init() {
             renderCalendar();
-            updateStats();
-        })();
-
-        // --- DROPDOWN LOGIC ---
-        function toggleFilterMenu() {
-            document.getElementById('filterMenu').classList.toggle('show');
+            updateDashboard();
+            scrollToToday();
         }
-        
-        // Cierra el menú si haces clic fuera
-        window.onclick = function(event) {
-            if (!event.target.matches('.filter-trigger-btn') && !event.target.closest('.filter-trigger-btn')) {
-                var dropdowns = document.getElementsByClassName("filter-menu");
-                for (var i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
-                }
+
+        function getDates() {
+            let dates = [];
+            let curr = new Date(CONFIG.start);
+            while (curr <= CONFIG.end) {
+                dates.push(new Date(curr));
+                curr.setDate(curr.getDate() + 1);
             }
+            return dates;
         }
 
-        function getPhase(date) {
-            const month = date.getMonth();
-            if (month <= 2) return phases[0];
-            if (month <= 6) return phases[1];
-            if (month <= 9) return phases[2];
-            return phases[3];
+        function formatDateKey(date) {
+            // Formato YYYY-MM-DD local
+            const offset = date.getTimezoneOffset();
+            const local = new Date(date.getTime() - (offset * 60 * 1000));
+            return local.toISOString().split('T')[0];
         }
 
         function renderCalendar() {
-            const container = document.getElementById('main-container');
+            const container = document.getElementById('calendarContainer');
             container.innerHTML = '';
             
-            let currentDate = new Date(startDate);
+            const allDates = getDates();
+            const todayKey = formatDateKey(new Date());
+
             let currentMonth = -1;
-            let monthGrid = null;
+            let monthWrapper = null;
+            let grid = null;
 
-            while (currentDate <= tripDate) {
-                const month = currentDate.getMonth();
-                const phase = getPhase(currentDate);
-
-                if (month !== currentMonth) {
-                    currentMonth = month;
-                    const monthBlock = document.createElement('div');
-                    monthBlock.className = 'month-block';
+            allDates.forEach(date => {
+                // Lógica de Meses
+                if (date.getMonth() !== currentMonth) {
+                    currentMonth = date.getMonth();
                     
-                    const monthTitle = document.createElement('div');
-                    monthTitle.className = 'month-header';
-                    monthTitle.innerText = currentDate.toLocaleDateString('es-MX', {month: 'long', year: 'numeric'});
-                    monthBlock.appendChild(monthTitle);
+                    monthWrapper = document.createElement('div');
+                    monthWrapper.className = 'month-section';
+                    
+                    const title = document.createElement('div');
+                    title.className = 'month-title';
+                    title.innerHTML = `<span>${date.toLocaleDateString('es-MX', {month:'long'}).toUpperCase()}</span>`;
+                    monthWrapper.appendChild(title);
 
-                    if (filterType === 'all') {
-                        const headerRow = document.createElement('div');
-                        headerRow.className = 'calendar-grid';
-                        ['LUN','MAR','MIE','JUE','VIE','SÁB','DOM'].forEach(d => {
-                            const h = document.createElement('div');
-                            h.className = 'day-header';
-                            h.innerText = d;
-                            headerRow.appendChild(h);
+                    // Headers de días (L M M J V S D)
+                    if (currentFilter === 'all') {
+                        const headers = document.createElement('div');
+                        headers.className = 'calendar-grid';
+                        ['L','M','M','J','V','S','D'].forEach(d => {
+                            headers.innerHTML += `<div class="day-header">${d}</div>`;
                         });
-                        monthBlock.appendChild(headerRow);
+                        monthWrapper.appendChild(headers);
                     }
 
-                    monthGrid = document.createElement('div');
-                    monthGrid.className = 'calendar-grid';
-                    if (filterType !== 'all') monthGrid.classList.add('filtered-mode');
-                    
-                    monthBlock.appendChild(monthGrid);
-                    container.appendChild(monthBlock);
+                    grid = document.createElement('div');
+                    grid.className = 'calendar-grid';
+                    monthWrapper.appendChild(grid);
+                    container.appendChild(monthWrapper);
 
-                    // Padding inicial para alinear días
-                    if (filterType === 'all') {
-                        let dayIndex = currentDate.getDay(); 
-                        let visualIndex = (dayIndex === 0) ? 6 : dayIndex - 1; 
-                        for(let i=0; i<visualIndex; i++) {
-                            const empty = document.createElement('div');
-                            empty.className = 'day-card empty';
-                            monthGrid.appendChild(empty);
-                        }
+                    // Espaciadores para empezar en el día correcto de la semana
+                    if (currentFilter === 'all') {
+                        let day = date.getDay();
+                        let emptySlots = day === 0 ? 6 : day - 1;
+                        for(let i=0; i<emptySlots; i++) grid.innerHTML += `<div></div>`;
                     }
                 }
 
-                const dateId = currentDate.toISOString().split('T')[0];
-                const dayOfWeek = currentDate.getDay();
-                const routine = routines[dayOfWeek];
-                const entry = trackingData[dateId];
-                
-                let showCard = true;
-                if (filterPhase !== 'all' && phase.id != filterPhase) showCard = false;
-                if (filterType !== 'all' && routine.type !== filterType) showCard = false;
+                // Render Día
+                const dayOfWeek = date.getDay();
+                const routine = ROUTINES[dayOfWeek];
+                const key = formatDateKey(date);
+                const data = store[key];
 
-                if (showCard) {
-                    const card = document.createElement('div');
-                    card.className = 'day-card';
-                    if (entry && entry.completed) card.classList.add('completed');
-                    if (entry && entry.note) card.classList.add('has-note');
-                    
-                    card.onclick = () => openModal(dateId, dayOfWeek, phase, routine);
-                    
-                    const svgHtml = document.getElementById(routine.icon).innerHTML;
-                    
-                    card.innerHTML = `
-                        <div class="day-phase">F${phase.id}</div>
-                        <div class="day-date">${currentDate.getDate()}</div>
-                        <svg class="activity-icon" viewBox="0 0 24 24">${svgHtml}</svg>
-                        <div class="activity-name">${routine.title}</div>
-                    `;
-                    monthGrid.appendChild(card);
-                }
+                // Filtro
+                if (currentFilter !== 'all' && routine.type !== currentFilter) return;
 
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-            
-            // LÓGICA ANTI-FANTASMA (Corrige lo de la captura de pantalla)
-            document.querySelectorAll('.month-block').forEach(block => {
-                const hasCards = block.querySelectorAll('.day-card:not(.empty)').length > 0;
-                if (!hasCards) {
-                    block.style.display = 'none';
-                } else {
-                    block.style.display = 'block';
-                }
+                const el = document.createElement('div');
+                el.className = 'day-card';
+                if (key === todayKey) el.classList.add('today');
+                if (data && data.completed) el.classList.add('completed');
+                if (data && data.note) el.classList.add('has-note');
+
+                el.onclick = () => openModal(date, routine, key);
+
+                el.innerHTML = `
+                    <span class="day-num">${date.getDate()}</span>
+                    <svg class="day-icon"><use href="${routine.icon}"></use></svg>
+                    <span class="day-label">${routine.type}</span>
+                `;
+                grid.appendChild(el);
             });
         }
 
-        function setPhaseFilter(val, btn) {
-            filterPhase = val;
-            document.querySelectorAll('.phase-btn').forEach(b => b.classList.remove('active'));
+        // --- DASHBOARD LOGIC ---
+        function updateDashboard() {
+            const today = new Date(); today.setHours(0,0,0,0);
+            const diffTime = Math.abs(CONFIG.end - today);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+            
+            const totalDays = getDates().length;
+            const completed = Object.keys(store).length;
+            const percentage = Math.round((completed / totalDays) * 100); // Un poco trampa (vs días pasados) pero motivador
+
+            document.getElementById('statDays').innerText = diffDays;
+            document.getElementById('statSessions').innerText = completed;
+            document.getElementById('progressText').innerText = percentage + "%";
+            document.getElementById('mainProgressBar').style.width = percentage + "%";
+        }
+
+        // --- INTERACTIONS ---
+        function filterBy(type, btn) {
+            currentFilter = type;
+            document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             renderCalendar();
         }
 
-        function setTypeFilter(val, btnElement, label) {
-            filterType = val;
-            
-            // Actualizar Label del Dropdown
-            const iconSvg = btnElement.querySelector('svg').outerHTML;
-            document.getElementById('filterLabel').innerHTML = iconSvg + " " + label;
-
-            // Actualizar estado visual del menú
-            document.querySelectorAll('.filter-option').forEach(b => b.classList.remove('selected'));
-            btnElement.classList.add('selected');
-            
-            renderCalendar();
+        function scrollToToday() {
+            setTimeout(() => {
+                const todayEl = document.querySelector('.today');
+                if (todayEl) todayEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+            }, 300);
         }
 
-        function openModal(dateStr, dayOfWeek, phase, routine) {
-            selectedDateId = dateStr;
-            const entry = trackingData[dateStr];
-            document.getElementById('modal').style.display = 'flex';
+        // --- MODAL LOGIC ---
+        function openModal(date, routine, key) {
+            selectedDateKey = key;
+            const data = store[key];
+            const modal = document.getElementById('modal');
             
-            const parts = dateStr.split('-');
-            const d = new Date(parts[0], parts[1]-1, parts[2]); 
+            document.getElementById('mDate').innerText = date.toLocaleDateString('es-MX', {weekday:'short', day:'numeric', month:'short'}).toUpperCase();
+            document.getElementById('mTitle').innerText = routine.title;
+            document.getElementById('mDesc').innerText = routine.desc;
+            document.getElementById('mNote').innerText = routine.note;
+            document.getElementById('mIcon').innerHTML = `<svg style="width:100%;height:100%;fill:inherit"><use href="${routine.icon}"></use></svg>`;
             
-            document.getElementById('modalDate').innerText = d.toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long'}).toUpperCase();
-            document.getElementById('modalTitle').innerText = routine.title;
-            
-            let desc = routine.desc;
-            if (routine.type === 'cerro') {
-                if (phase.id === 1) desc = "Cerro San Juan (Mitad) o La Cruz. Sin peso extra.";
-                if (phase.id === 2) desc = "Cerro San Juan Completo. Botas nuevas y mochila 4kg.";
-                if (phase.id === 3) desc = "Ruta Larga (10km+). Mochila peso real (8kg).";
-            }
-            document.getElementById('modalDescription').innerText = desc;
-            document.getElementById('modalNote').innerText = routine.note;
-            document.getElementById('journalInput').value = entry ? (entry.note || "") : "";
+            const input = document.getElementById('mInput');
+            const btn = document.getElementById('mBtn');
 
-            const btn = document.getElementById('completeBtn');
-            if(entry && entry.completed) {
-                btn.innerText = "DESMARCAR";
-                btn.className = "action-btn btn-undo";
+            input.value = data ? (data.note || '') : '';
+            
+            if (data && data.completed) {
+                btn.innerText = "DESMARCAR (UNDO)";
+                btn.classList.add('completed-state');
+                btn.style.background = '#333';
             } else {
                 btn.innerText = "MARCAR COMPLETADO";
-                btn.className = "action-btn btn-complete";
+                btn.classList.remove('completed-state');
+                btn.style.background = '#E0E0E0';
             }
+
+            modal.style.display = 'flex';
         }
 
-        function toggleComplete() {
-            const note = document.getElementById('journalInput').value;
-            if (trackingData[selectedDateId] && trackingData[selectedDateId].completed) {
-                delete trackingData[selectedDateId];
+        function closeModal(e) {
+            if (e && e.target.id !== 'modal') return;
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        function toggleStatus() {
+            const note = document.getElementById('mInput').value;
+            
+            if (store[selectedDateKey] && store[selectedDateKey].completed) {
+                delete store[selectedDateKey];
             } else {
-                trackingData[selectedDateId] = { completed: true, note: note };
+                store[selectedDateKey] = { completed: true, note: note };
             }
-            localStorage.setItem('patagoniaFinal_v6', JSON.stringify(trackingData));
-            closeModal();
-            renderCalendar();
-            updateStats();
+            
+            localStorage.setItem(CONFIG.storageKey, JSON.stringify(store));
+            
+            // Haptic Feedback simulado (Visual)
+            const btn = document.getElementById('mBtn');
+            btn.innerText = "GUARDANDO...";
+            
+            setTimeout(() => {
+                document.getElementById('modal').style.display = 'none';
+                renderCalendar();
+                updateDashboard();
+            }, 200);
         }
-
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
-        function openSettings() { document.getElementById('settingsModal').style.display = 'flex'; }
-        function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
 
         function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(trackingData));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(store));
             const anchor = document.createElement('a');
             anchor.setAttribute("href", dataStr);
-            anchor.setAttribute("download", "patagonia_backup.json");
+            anchor.setAttribute("download", "patagonia_data.json");
             document.body.appendChild(anchor);
             anchor.click();
             anchor.remove();
+            alert("Datos exportados. Guarda este archivo.");
         }
 
-        function importData(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    trackingData = JSON.parse(e.target.result);
-                    localStorage.setItem('patagoniaFinal_v6', JSON.stringify(trackingData));
-                    alert("Datos cargados.");
-                    closeSettings();
-                    renderCalendar();
-                    updateStats();
-                } catch(err) { alert("Error en archivo."); }
-            };
-            reader.readAsText(file);
-        }
+        // AUTO-INIT
+        init();
 
-        function updateStats() {
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            const trip = new Date(tripDate);
-            trip.setHours(0,0,0,0);
-            
-            const oneDay = 24 * 60 * 60 * 1000;
-            const diffDays = Math.round((trip - today) / oneDay);
-            
-            document.getElementById('daysLeft').innerText = diffDays > 0 ? diffDays : 0;
-            document.getElementById('completedCount').innerText = Object.keys(trackingData).length;
-            document.getElementById('currentPhaseLabel').innerText = getPhase(today).name;
-        }
     </script>
 </body>
 </html>
