@@ -1,0 +1,192 @@
+---
+// Calendar.astro
+---
+
+<div id="calendar-wrapper"></div>
+
+<script>
+    import { trackingData } from '../stores/trainingStore';
+
+    const container = document.getElementById('calendar-wrapper');
+    const startDate = new Date(2026, 0, 19); 
+    const tripDate = new Date(2026, 10, 1); 
+
+    // SVG Definitions (Minimalist Strings)
+    const svgs = {
+        walking: '<path d="M13 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM18 11l-4-4H9.14a3 3 0 0 0-2.83 2h-.17l-4 9h2l3-7h2l-2 9h2l2-7h2l2 7h2l-2-9z" fill="currentColor"/>',
+        running: '<path d="M15.5 5.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0zM19 14l-4-3-3 4h2v7h2v-5l2-2h2v-2l-1-1zM5 13l3.5 6H11v-2h-1l-3-5 3-4h-2l-3 5z" fill="currentColor"/>',
+        bike: '<path d="M15 4a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm-4 7l2 4h4v-2h-3l-2-4h-2l-3 6h-2l3-6 3 2zM5 10a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm14-6a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4z" fill="currentColor"/>',
+        hiking: '<path d="M14 6a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0zM16 11l-3.5-3.5-1 1 2 2H11L8.5 7.5 5 11h2l2-3 2 3h.5l-2 9h2L14 12h1l1.5 5h2l-2.5-6zM7 16l-3 4h2l2-3v-2l-1 1z" fill="currentColor"/>',
+        trekking: '<path d="M12 2L2 19h20L12 2zm0 4l6 11H6l6-11z" fill="currentColor"/>',
+        hit: '<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor"/>', // Lightning
+        relax: '<path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zM11 7h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/>',
+        gym: '<path d="M4 7h16v2H4V7zm0 8h16v2H4v-2zM2 9v6h2V9H2zm18 0v6h2V9h-2zM7 5v14h2V5H7zm8 0v14h2V5h-2z" fill="currentColor"/>',
+        backpack: '<path d="M7 2a2 2 0 0 0-2 2v1h2V4h10v1h2V4a2 2 0 0 0-2-2H7zm-2 6v14h14V8H5zm4 2h6v8H9v-8z" fill="currentColor"/>',
+        check: '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/>'
+    };
+
+    // Get SVG string helper
+    const getIconIdx = (key) => svgs[key] ? `<svg viewBox="0 0 24 24" width="22" height="22">${svgs[key]}</svg>` : '';
+
+    const routines = [
+         { title: "Cerro / Relax", type: "hiking" }, 
+         { title: "Relax / Yoga", type: "relax" }, 
+         { title: "Speed / Z2", type: "running" },
+         { title: "Gym Pierna", type: "gym" },
+         { title: "Intervalos", type: "running" }, 
+         { title: "Descanso", type: "relax" },
+         { title: "Día de Cerro", type: "hiking" }  
+    ];
+    
+    // Activity Mappings
+    const mapKey = {
+        'hikking': 'hiking', 'cerro': 'hiking'
+    };
+
+    function render(data = {}) {
+        container.innerHTML = '';
+        let currentDate = new Date(startDate);
+        const today = new Date(); today.setHours(0,0,0,0);
+        let weekCount = 1;
+
+        while (currentDate < tripDate) {
+            // ... (Phase logic same) ...
+            const m = currentDate.getMonth(); 
+            let ph = "FASE 1"; let col = "#ea580c"; // Default Orange
+            if(m >= 2) ph = "FASE 2"; 
+            if(m >= 6) ph = "FASE 3"; 
+            if(m >= 9) ph = "TAPER"; 
+
+            const weekDiv = document.createElement('div');
+            weekDiv.className = 'week-container';
+            const wb = new Date(currentDate);
+            const we = new Date(currentDate); we.setDate(we.getDate()+6);
+            const dateStr = `${wb.getDate()} - ${we.getDate()} ${wb.toLocaleDateString('es-ES',{month:'short'}).toUpperCase()}`;
+            
+            weekDiv.innerHTML = `
+                <div class="week-header-styled">
+                    <div class="wh-left">
+                        <span class="wh-title">SEMANA ${weekCount} // <span style="color:${col}">${ph}</span></span>
+                        <span class="wh-dates">${dateStr}</span>
+                    </div>
+                </div>
+            `;
+
+            const grid = document.createElement('div');
+            grid.className = 'days-scroller';
+
+            for(let i=0; i<7; i++) {
+                const dId = currentDate.toISOString().split('T')[0];
+                const dayIdx = currentDate.getDay();
+                const entries = data[dId] || [];
+                const count = entries.length;
+                const hasEntry = count > 0;
+                
+                const isToday = (currentDate.getTime() === today.getTime());
+                
+                let iconHtml = '';
+                let label = '';
+
+                // DEFAULT ROUTINE
+                const routineTitle = routines[dayIdx].title;
+                const routineType = routines[dayIdx].type;
+
+                if(hasEntry) {
+                    // Use first entry for Icon
+                    const first = entries[0];
+                    if(first.backpackWeight > 0) iconHtml = getIconIdx('backpack');
+                    else {
+                        let k = (first.activityType || '').toLowerCase();
+                        k = mapKey[k] || k;
+                        iconHtml = getIconIdx(k) || getIconIdx('check');
+                    }
+                    
+                    if(count > 1) {
+                         label = `${count} Actividades`;
+                    } else {
+                         label = first.title;
+                    }
+                } else {
+                    iconHtml = getIconIdx(routineType);
+                    label = routineTitle;
+                }
+
+                const btn = document.createElement('button');
+                btn.className = `day-card-modern ${hasEntry ? 'completed' : ''} ${isToday ? 'today' : ''}`;
+                
+                // CLICK: Just pass ID, Modal handles "Add New" or "List"
+                btn.onclick = () => window.openActivityModal(dId);
+
+                // BADGE for Count > 1
+                const badgeHtml = count > 1 ? `<span class="multi-badge">+${count-1}</span>` : '';
+
+                btn.innerHTML = `
+                    <span class="d-date">${currentDate.getDate()}</span>
+                    ${badgeHtml}
+                    <div class="d-icon-svg">${iconHtml}</div>
+                    <div class="d-label">${label}</div>
+                `;
+                grid.appendChild(btn);
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            weekDiv.appendChild(grid);
+            container.appendChild(weekDiv);
+            weekCount++;
+        }
+    }
+
+    trackingData.subscribe(val => render(val));
+</script>
+
+<style>
+    /* ... (Week Styles Same) ... */
+    :global(.week-container) { margin-bottom: 20px; padding: 10px; border: 1px solid #334155; border-radius: 12px; background: #0f172a; }
+    :global(.week-header-styled) { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #334155; }
+    :global(.wh-left) { display: flex; flex-direction: column; }
+    :global(.wh-title) { font-family: var(--font-head); font-size: 0.9rem; color: white; }
+    :global(.wh-dates) { font-size: 0.7rem; color: #94a3b8; font-weight: 600; }
+    
+    :global(.days-scroller) {
+        display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;
+    }
+    :global(.days-scroller::-webkit-scrollbar) { display: none; }
+
+    :global(.day-card-modern) {
+        flex: 0 0 28%; /* Mobile default */
+        min-width: 100px; height: 85px;
+        background: #1e293b; border-radius: 8px; border: none;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        position: relative; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    /* DESKTOP TWEAKS if container < 600px effectively behaves like mobile */
+    /* Let's ensure they don't get too wide if flex grows */
+    
+    :global(.day-card-modern.completed) {
+        background: #334155; border: 1px solid var(--primary);
+    }
+    :global(.day-card-modern.today) { border: 2px solid white; }
+
+    :global(.d-date) { position: absolute; top:6px; right:8px; font-weight:700; font-size:0.75rem; color:#64748b; }
+    :global(.completed .d-date) { color: white; }
+    
+    :global(.multi-badge) {
+        position: absolute; top: 6px; left: 6px;
+        background: var(--primary); color: white;
+        font-size: 0.6rem; padding: 1px 4px; border-radius: 4px; font-weight:bold;
+    }
+
+    /* SVG ICON STYLE */
+    :global(.d-icon-svg) {  
+        color: #94a3b8; /* Default Icon Color */
+        margin-bottom: 4px; 
+    }
+    :global(.completed .d-icon-svg) { color: var(--primary); } 
+    /* Or White for completed? Primary looks good for high vis */
+    
+    :global(.d-label) {
+        font-size: 0.6rem; color: #64748b; margin-top: 2px;
+        max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    :global(.completed .d-label) { color: #cbd5e1; }
+</style>

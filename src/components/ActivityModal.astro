@@ -1,0 +1,409 @@
+---
+import ActivityIcon from './ActivityIcon.astro';
+// ActivityModal.astro
+---
+
+<div id="activityModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle" style="font-family: 'Inter', sans-serif; font-weight: 800; letter-spacing: -0.5px;">ACTIVIDAD</h2>
+            <button class="close-btn" id="closeModalBtn">&times;</button>
+        </div>
+        
+        <div class="form-body">
+            
+            <!-- LIST OF EXISTING ACTIVITIES FOR THIS DAY -->
+            <div id="dayActivitiesList" class="activities-list hidden">
+                <!-- Injected via JS -->
+            </div>
+            
+            <div id="addDivider" class="add-divider hidden">
+                <span>Nueva Actividad</span>
+            </div>
+
+            <!-- FORM START -->
+            <div id="formSection">
+                <!-- CUSTOM DROPDOWN SELECTOR -->
+                 <div class="dropdown-wrapper">
+                    <button type="button" id="dropdownBtn" class="dropdown-btn">
+                        <div class="dd-left">
+                            <span id="ddIcon" class="dd-icon"><ActivityIcon name="walking" size={20} /></span>
+                            <span id="ddLabel" class="dd-label">Walk</span>
+                        </div>
+                        <span class="dd-chevron">▼</span>
+                    </button>
+                    
+                    <div id="dropdownMenu" class="dropdown-menu hidden">
+                        <div class="grid-options">
+                            <button type="button" class="opt-btn" data-type="walking" data-label="Walk"><ActivityIcon name="walking" size={18} /> Walk</button>
+                            <button type="button" class="opt-btn" data-type="running" data-label="Run"><ActivityIcon name="running" size={18} /> Run</button>
+                            <button type="button" class="opt-btn" data-type="bike" data-label="Bike"><ActivityIcon name="bike" size={18} /> Bike</button>
+                            <button type="button" class="opt-btn" data-type="hiking" data-label="Hike"><ActivityIcon name="hiking" size={18} /> Hike</button>
+                            <button type="button" class="opt-btn" data-type="trekking" data-label="Trek"><ActivityIcon name="trekking" size={18} /> Trek</button>
+                            <button type="button" class="opt-btn" data-type="hit" data-label="HIT"><ActivityIcon name="hit" size={18} /> HIT</button>
+                            <button type="button" class="opt-btn" data-type="relax" data-label="Relax"><ActivityIcon name="relax" size={18} /> Relax</button>
+                            <button type="button" class="opt-btn" data-type="gym" data-label="Gym"><ActivityIcon name="gym" size={18} /> Gym</button>
+                        </div>
+                    </div>
+                 </div>
+    
+                <!-- MAIN INPUTS -->
+                <div class="input-row" style="margin-bottom: 8px;">
+                    <input type="text" id="inpTitle" placeholder="Título (Ej: Cerro San Juan)" class="full-width" />
+                </div>
+    
+                <div class="metrics-grid">
+                    <div class="grp" id="grpDur">
+                        <label>TIEMPO (MIN)</label>
+                        <input type="number" id="inpDur" placeholder="0" />
+                    </div>
+                    
+                    <div class="grp hidden" id="grpDist">
+                        <label>DIST (KM)</label>
+                        <input type="number" id="inpDist" step="0.1" placeholder="0.0" />
+                    </div>
+                    
+                    <div class="grp hidden" id="grpElev">
+                        <label>ELEV (M)</label>
+                        <input type="number" id="inpElev" placeholder="0" />
+                    </div>
+
+                    <div class="grp hidden" id="grpCal">
+                        <label>KCAL</label>
+                        <input type="number" id="inpCal" placeholder="0" />
+                    </div>
+                    
+                    <div class="grp hidden" id="grpWeight">
+                        <label class="lbl-primary">PESO (KG)</label>
+                        <input type="number" id="inpWeight" step="0.5" class="inp-highlight" placeholder="0.0" />
+                    </div>
+                </div>
+    
+                <div class="grp">
+                    <label>NOTAS / SENSACIONES</label>
+                    <textarea id="inpNote" rows="2" placeholder="¿Cómo te sentiste?"></textarea>
+                </div>
+    
+                <div class="actions">
+                    <button id="btnCancelEdit" class="btn-cancel hidden" style="background:#64748b; color:white; padding:12px; border-radius:8px; width:100%; font-weight:700;">CANCELAR</button>
+                    <button id="btnDelete" class="btn-del hidden">BORRAR</button>
+                    <button id="btnSave" class="btn-save">GUARDAR</button>
+                </div>
+            </div>
+            <!-- FORM END -->
+
+        </div>
+    </div>
+</div>
+
+<script>
+    import { addActivity, updateActivity, deleteActivity, trackingData } from '../stores/trainingStore';
+
+    let currentDateId = null;
+    let editingIndex = -1; // -1 means adding new
+    let currentType = 'walking';
+
+    const modal = document.getElementById('activityModal');
+    // Inputs
+    const iTitle = document.getElementById('inpTitle');
+    const iDur = document.getElementById('inpDur');
+    const iWeight = document.getElementById('inpWeight');
+    const iDist = document.getElementById('inpDist');
+    const iElev = document.getElementById('inpElev');
+    const iCal = document.getElementById('inpCal');
+    const iNote = document.getElementById('inpNote');
+
+    // Groups for Visibility
+    const gDist = document.getElementById('grpDist');
+    const gElev = document.getElementById('grpElev');
+    const gCal = document.getElementById('grpCal');
+    const gWeight = document.getElementById('grpWeight');
+
+    // UI Logic Elements
+    const listContainer = document.getElementById('dayActivitiesList');
+    const formSection = document.getElementById('formSection');
+    const modalTitle = document.getElementById('modalTitle');
+    
+    // Dropdown
+    const ddBtn = document.getElementById('dropdownBtn');
+    const ddMenu = document.getElementById('dropdownMenu');
+    const ddIcon = document.getElementById('ddIcon');
+    const ddLabel = document.getElementById('ddLabel');
+
+    ddBtn.onclick = (e) => { ddMenu.classList.toggle('hidden'); e.stopPropagation(); };
+    document.addEventListener('click', (e) => {
+        if(!ddBtn.contains(e.target) && !ddMenu.contains(e.target)) ddMenu.classList.add('hidden');
+    });
+
+    // Option Click
+    document.querySelectorAll('.opt-btn').forEach(btn => {
+        btn.onclick = () => {
+            setType(btn.getAttribute('data-type'), btn.getAttribute('data-label'), btn.querySelector('svg').outerHTML);
+            ddMenu.classList.add('hidden');
+        }
+    });
+
+    function setType(type, label, iconHTML) {
+        currentType = type;
+        ddLabel.innerText = label || type;
+        if(iconHTML) ddIcon.innerHTML = iconHTML;
+        else {
+            // Find icon from list if missing
+            const b = document.querySelector(`.opt-btn[data-type="${type}"]`);
+            if(b) ddIcon.innerHTML = b.querySelector('svg').outerHTML;
+        }
+        updateVisibilities(type);
+    }
+
+    // MAIN OPEN FUNCTION
+    window.openActivityModal = (dId) => {
+        currentDateId = dId;
+        modal.classList.remove('hidden');
+        renderList();
+        
+        // Start in "Add New" mode
+        startAddingNew();
+    };
+
+    function renderList() {
+        const data = trackingData.get();
+        const entries = data[currentDateId] || [];
+        
+        listContainer.innerHTML = '';
+        
+        if(entries.length > 0) {
+            listContainer.classList.remove('hidden');
+            entries.forEach((act, idx) => {
+                const div = document.createElement('div');
+                div.className = 'act-item-row';
+                div.innerHTML = `
+                    <div class="act-info">
+                        <span class="act-type-badge">${act.activityType}</span>
+                        <span class="act-idx-title">${act.title}</span>
+                    </div>
+                    <button class="act-edit-btn">✏️</button>
+                `;
+                div.querySelector('.act-edit-btn').onclick = () => loadForEditing(idx, act);
+                listContainer.appendChild(div);
+            });
+        } else {
+            listContainer.classList.add('hidden');
+        }
+    }
+
+    function loadForEditing(idx, act) {
+        editingIndex = idx;
+        modalTitle.innerText = "EDITAR";
+        
+        // Populate Form
+        iTitle.value = act.title || '';
+        iDur.value = act.duration || '';
+        iDist.value = act.distance || '';
+        iElev.value = act.elevation || '';
+        iCal.value = act.calories || '';
+        iWeight.value = act.backpackWeight || '';
+        iNote.value = act.note || '';
+        
+        setType(act.activityType, null, null);
+
+        document.getElementById('btnDelete').classList.remove('hidden');
+        document.getElementById('btnCancelEdit').classList.remove('hidden');
+        document.getElementById('btnSave').innerText = "ACTUALIZAR";
+        
+        // Scroll form into view if list is long
+        formSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function startAddingNew() {
+        editingIndex = -1;
+        modalTitle.innerText = "NUEVA ACTIVIDAD";
+        resetForm();
+        setType('walking', 'Walk', null); // Default
+
+        document.getElementById('btnDelete').classList.add('hidden');
+        document.getElementById('btnCancelEdit').classList.add('hidden');
+        document.getElementById('btnSave').innerText = "GUARDAR";
+    }
+    
+    document.getElementById('btnCancelEdit').onclick = startAddingNew;
+
+    function resetForm() {
+        iTitle.value = ''; iDur.value = ''; 
+        iDist.value = ''; iElev.value = ''; 
+        iCal.value = ''; iWeight.value = '';
+        iNote.value = '';
+    }
+
+    function closeModal() { modal.classList.add('hidden'); ddMenu.classList.add('hidden'); }
+    document.getElementById('closeModalBtn').onclick = closeModal;
+
+    // LOGIC PER SPORT
+    function updateVisibilities(t) {
+        // Reset all to hidden
+        gDist.classList.add('hidden');
+        gElev.classList.add('hidden');
+        gCal.classList.add('hidden');
+        gWeight.classList.add('hidden');
+
+        // Always show Time (grpDur is not toggled, assuming it's always useful, except maybe relax?)
+        // Actually for relax user said "solo boton relax y dato cualitativo". 
+        // Maybe Time is useful for meditation duration? Let's keep Time always visible.
+
+        switch(t) {
+            case 'walking':
+            case 'running':
+                gDist.classList.remove('hidden');
+                gCal.classList.remove('hidden');
+                break;
+            case 'bike':
+                gDist.classList.remove('hidden');
+                gElev.classList.remove('hidden'); // Bike has elevation
+                gCal.classList.remove('hidden');
+                break;
+            case 'hiking':
+            case 'trekking':
+            case 'cerro':
+                gDist.classList.remove('hidden');
+                gElev.classList.remove('hidden');
+                gCal.classList.remove('hidden');
+                gWeight.classList.remove('hidden');
+                break;
+            case 'gym':
+            case 'hit':
+            case 'crossfit':
+                gCal.classList.remove('hidden');
+                // Dist/Elev usually not tracked or different units.
+                break;
+            case 'relax':
+            case 'yoga':
+                // Just Time + Notes
+                break;
+            default:
+                // Default show some
+                gCal.classList.remove('hidden');
+                break;
+        }
+    }
+
+    document.getElementById('btnSave').onclick = () => {
+        const obj = {
+            activityType: currentType,
+            title: iTitle.value || "Entreno",
+            duration: parseInt(iDur.value) || 0,
+            distance: parseFloat(iDist.value) || 0,
+            elevation: parseInt(iElev.value) || 0,
+            calories: parseInt(iCal.value) || 0,
+            backpackWeight: parseFloat(iWeight.value) || 0,
+            note: iNote.value,
+            timestamp: Date.now()
+        };
+        
+        if(editingIndex === -1) {
+            addActivity(currentDateId, obj);
+        } else {
+            updateActivity(currentDateId, editingIndex, obj);
+        }
+        
+        // Refresh list to show change (or close? usually close for 'Add', but maybe stay for multi? User said he wants possibility. Closing is cleaner.)
+        closeModal(); 
+        // If we wanted to stay: renderList(); startAddingNew();
+    };
+
+    document.getElementById('btnDelete').onclick = () => {
+        if(confirm("¿Borrar esta actividad?")) {
+            deleteActivity(currentDateId, editingIndex);
+            // If deleted, we can either close or go back to list
+             closeModal();
+        }
+    };
+</script>
+
+<style>
+    .modal {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(15, 23, 42, 0.95); z-index: 999;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .modal-content {
+        background: #1e293b; width: 90%; max-width: 450px;
+        border-radius: 16px; padding: 20px;
+        box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+        display: flex; flex-direction: column;
+        max-height: 90vh; 
+    }
+    .modal-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+    .close-btn { font-size: 2rem; color: #64748b; line-height: 0.8; }
+    .form-body { overflow-y: auto; padding-right: 5px; }
+
+    /* LIST STYLES */
+    .activities-list {
+        background: #0f172a; border-radius: 8px; padding: 8px; margin-bottom: 15px;
+        border: 1px solid #334155;
+    }
+    .act-item-row {
+        display: flex; justify-content: space-between; align-items: center;
+        background: #1e293b; padding: 8px; border-radius: 4px; margin-bottom: 5px;
+    }
+    .act-item-row:last-child { margin-bottom: 0; }
+    .act-info { display: flex; gap: 8px; align-items: center; }
+    .act-type-badge {
+        font-size: 0.6rem; text-transform: uppercase; background: #334155; padding: 2px 6px; border-radius: 4px; color: #cbd5e1;
+    }
+    .act-idx-title { font-size: 0.85rem; color: white; font-weight: 600; }
+    .act-edit-btn { background: none; border: none; cursor: pointer; font-size: 0.9rem; }
+
+    /* DROPDOWN & INPUTS (Inherited mostly, refined for layout) */
+    .dropdown-wrapper { position: relative; margin-bottom: 20px; z-index: 50; }
+    .dropdown-btn {
+        width: 100%; background: #334155; color: white; border: 1px solid #475569;
+        padding: 12px 15px; border-radius: 8px;
+        display: flex; justify-content: space-between; align-items: center;
+        cursor: pointer; transition: 0.2s;
+    }
+    .dropdown-btn:hover { border-color: var(--primary); background: #475569; }
+    .dd-left { display: flex; align-items: center; gap: 10px; font-weight: 700; text-transform: uppercase; }
+    .dd-chevron { font-size: 0.8rem; color: #cbd5e1; }
+    .dd-icon { color: var(--primary); display: flex; align-items: center; }
+
+    .dropdown-menu {
+        position: absolute; top: 110%; left: 0; width: 100%;
+        background: #0f172a; border: 1px solid #334155; border-radius: 8px;
+        padding: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 100;
+    }
+    .grid-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .opt-btn {
+        background: #1e293b; border: 1px solid #334155; color: #cbd5e1;
+        padding: 8px; border-radius: 6px; font-size: 0.9rem;
+        display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.1s;
+    }
+    .opt-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+    /* INPUTS */
+    input, textarea {
+        background: #0f172a; border: 1px solid #334155;
+        color: white; padding: 10px; border-radius: 8px;
+        width: 100%; font-size: 1rem;
+        box-sizing: border-box;
+    }
+    .full-width { margin-bottom: 10px; font-weight: 700; width: 100%; }
+    
+    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; width: 100%; }
+    .grp label { 
+        display: block; font-size: 0.65rem; color: #64748b; margin-bottom: 3px; font-weight: 700; 
+    }
+    .lbl-primary { color: var(--primary) !important; }
+    .inp-highlight { border-color: var(--primary); }
+
+    .actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; } /* Edit mode might need 3 buttons */
+    /* If adding new (default), we hide Cancel/Delete, so Save spans. We can adjust via JS classes. */
+    /* But simplified: Actions Flex */
+    .actions { display: flex; gap: 10px; margin-top: 15px; }
+    
+    .btn-save {
+        background: var(--primary); color: white; padding: 12px; border-radius: 8px;
+        font-weight: 800; text-transform: uppercase; flex: 1; font-size: 0.95rem; cursor: pointer; border: none;
+    }
+    .btn-del {
+        background: #ef4444; color: white; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; cursor: pointer; border: none;
+    }
+</style>

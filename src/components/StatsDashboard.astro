@@ -1,0 +1,213 @@
+---
+// StatsDashboard.astro
+---
+
+<div class="dashboard-wrapper">
+    
+    <!-- ROW 1: 3 MAIN STATS CARDS -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <h3>DÍAS RESTANTES</h3>
+            <p id="daysLeft" class="russo-font">--</p>
+        </div>
+        <div class="stat-card">
+            <h3>ENTRENOS</h3>
+            <p id="completedCount" class="russo-font">--</p>
+        </div>
+        <div class="stat-card">
+            <h3>FASE ACTUAL</h3>
+            <p id="currentPhaseLabel" class="russo-font text-primary">--</p>
+        </div>
+    </div>
+
+    <!-- ROW 2: ASCENT -->
+    <div class="ascent-card">
+        <div class="ascent-header">
+            <h3 class="russo-font lbl-title">ASCENSO MENSUAL</h3>
+            <span id="currentElev" class="text-primary russo-font" style="font-size: 1rem;">0m</span>
+        </div>
+        <div class="ascent-body">
+            <div class="v-prog-bg">
+                <div id="elevProgressBar" class="v-prog-fill"></div>
+            </div>
+            <div class="milestones">
+                    <div class="ms" style="bottom:100%">⛰️ FITZ ROY (1.4k)</div>
+                    <div class="ms" style="bottom:78%">🌋 SANGANGÜEY</div>
+                    <div class="ms" style="bottom:18%">⛰️ CRUZ (250m)</div>
+                    <div class="ms" style="bottom:0%">🏠</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 3: WHITE PROGRESS CARD (Adaptive color) -->
+    <div class="white-progress-card">
+        <div class="wp-header">
+            <h3 class="wp-title">PROGRESO GENERAL</h3>
+            <span class="wp-count"><span id="countText">1</span> / 300</span>
+        </div>
+        
+        <div class="wp-mid-row">
+            <div class="wp-big-number">
+                <span id="completionPct">0.3%</span>
+            </div>
+            <div class="wp-subtitle">
+                <span id="progDetails">Loading...</span>
+            </div>
+        </div>
+
+        <div class="wp-bar-bg">
+            <div id="mainProgressBar" class="wp-bar-fill"></div>
+        </div>
+    </div>
+
+    <div class="dist-chart" id="distChart"></div>
+
+</div>
+
+<script>
+    import { trackingData } from '../stores/trainingStore';
+    // ... Logic stays same, just CSS update ...
+    const tripDate = new Date(2026, 10, 1); 
+    const phases = [ { id: 1, name: "FASE 1: BASE", endMonth: 2 }, { id: 2, name: "FASE 2: FUERZA", endMonth: 6 }, { id: 3, name: "FASE 3: RESIST", endMonth: 9 }, { id: 4, name: "TAPER", endMonth: 10 } ];
+    function updateStats(data = {}) {
+        const today = new Date();
+        const diffDays = Math.ceil((tripDate.getTime() - today.getTime()) / (24*60*60*1000));
+        document.getElementById('daysLeft').innerText = diffDays > 0 ? diffDays : 0;
+
+        // COUNT DAYS (Not total activities)
+        const entries = Object.entries(data);
+        const daysTrained = entries.filter(([k, val]) => val && val.length > 0).length;
+        document.getElementById('completedCount').innerText = daysTrained;
+
+        const all = entries.map(e => e[1]).flat(); // Still need all for elevation/charts
+
+        const month = today.getMonth() + 1;
+        let currentPhase = phases.find(p => month <= p.endMonth) || phases[phases.length - 1];
+        document.getElementById('currentPhaseLabel').innerText = currentPhase.name.replace('FASE', 'F.');
+
+        const totalDays = 300; 
+        const progress = Math.min((daysTrained / totalDays) * 100, 100).toFixed(1);
+        
+        document.getElementById('completionPct').innerText = `${progress}%`;
+        document.getElementById('countText').innerText = daysTrained;
+        document.getElementById('progDetails').innerText = `Días Completados · ${diffDays} Restantes`;
+        document.getElementById('mainProgressBar').style.width = `${progress}%`;
+
+        let monthlyElev = 0; const currentMonth = today.getMonth(); const dist = {};
+        all.forEach(a => {
+            if(new Date(a.timestamp).getMonth() === currentMonth) monthlyElev += (a.elevation || 0);
+            let k = (a.activityType || 'other').toLowerCase(); if(k==='hikking') k='hiking';
+            dist[k] = (dist[k]||0)+1;
+        });
+        const elevPct = Math.min((monthlyElev / 1400) * 100, 100);
+        document.getElementById('currentElev').innerText = `${monthlyElev}m`;
+        document.getElementById('elevProgressBar').style.height = `${elevPct}%`;
+        renderChart(dist, all.length); // Chart still distribution of TYPES (uses total activities count for %)
+    }
+    
+    function renderChart(dist, total) {
+       if(total === 0) return;
+        const container = document.getElementById('distChart'); container.innerHTML = '';
+        const colors = { hiking: '#ea580c', running: '#3b82f6', bike: '#8b5cf6', walking: '#10b981', gym: '#64748b' };
+        Object.entries(dist).forEach(([key, count]) => {
+             const pct = (count / total) * 100;
+             const col = colors[key] || '#94a3b8';
+             const div = document.createElement('div');
+             div.className = 'mini-bar'; div.style.marginBottom='2px';
+             div.innerHTML = `
+                <div style="display:flex; justify-content:space-between; font-size:0.55rem; color:var(--text-muted);">
+                    <span style="text-transform:uppercase;">${key}</span><span>${count}</span>
+                </div>
+                <div style="height:3px; background:var(--border); border-radius:2px;">
+                    <div style="height:100%; width:${pct}%; background:${col}; border-radius:2px;"></div>
+                </div>
+             `;
+             container.appendChild(div);
+        });
+    }
+    trackingData.subscribe(val => updateStats(val));
+</script>
+
+<style>
+    .dashboard-wrapper { padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+
+    /* CARDS */
+    .stat-card {
+        background: var(--bg-card); /* Adaptive */
+        border-radius: 6px; padding: 8px 4px; text-align: center;
+        border: 1px solid var(--border);
+    }
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+
+    .stat-card h3 {
+        font-family: var(--font-body); font-size: 0.5rem; color: var(--text-muted); margin: 0 0 2px 0; font-weight: 700; text-transform: uppercase;
+    }
+    .stat-card p {
+        font-family: var(--font-head); font-size: 1.2rem; margin: 0; color: var(--text-main); line-height: 1;
+    }
+    .text-primary { color: var(--primary) !important; }
+
+    /* ASCENT */
+    .ascent-card {
+        background: var(--bg-card); padding: 10px; border-radius: 8px;
+        border-top: 2px solid #10b981;
+        display: flex; flex-direction: column; height: 140px;
+        border: 1px solid var(--border); border-top-width: 2px;
+    }
+    .ascent-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+    .lbl-title { color: var(--text-main); font-size: 0.8rem; }
+    
+    .ascent-body { flex: 1; display: flex; gap: 12px; }
+    .v-prog-bg { width: 10px; background: var(--border); border-radius: 5px; position: relative; overflow: hidden; }
+    .v-prog-fill { width: 100%; position: absolute; bottom: 0; left: 0; background: linear-gradient(to top, #ea580c, #fca5a5); }
+    .milestones { flex: 1; position: relative; font-size: 0.6rem; color: var(--text-muted); }
+    .ms { position: absolute; width: 100%; border-bottom: 1px dashed var(--border); padding-bottom: 1px; line-height: 1;}
+
+    /* PROGRESS CARD (Inverted logic for light mode?) 
+       User wanted "White Card". 
+       In Light Mode, main BG is Light, Card is White... so it blends?
+       Maybe give it a different background or shadow pop.
+       In Dark Mode: Main Dark, Card White (as requested).
+       Let's stick to "White" explicit for contrast in Dark Mode.
+       In Light Mode, White is just normal... maybe make it Off-White or stick to White with Shadow.
+    */
+    .white-progress-card {
+        background: #ffffff; /* Explicitly white always? Or Adaptive? */
+        /* User image showed white card on dark bg. */
+        /* If system is Light, white card on light bg is fine. */
+        /* Let's follow variable logic but ensure contrast. */
+        background: var(--bg-card); 
+        /* Wait, if I use var(--bg-card) in Dark Mode it is #1e293b (Dark). 
+           User SPECIFICALLY asked for the "White Card" look in dark mode. 
+           So for Dark Mode, this specific card should stay White? 
+           Or did they just like the layout? "implementé la tarjeta BLANCA estilo imagen".
+           If I make it adaptive, I lose that specific "White on Dark" look.
+           But user said "ADAPTE AL COLOR DEL SISTEMA".
+           If System is Dark -> They probably want Dark Theme.
+           The "Reference Image" was dark mode but with a white/light card.
+           I will try to keep it adaptive (Dark Card in Dark Mode) BUT user just said "White Card style".
+           Let's make it stand out.
+           Actually, consistent Dark Theme usually means Dark Cards. 
+           I will use var(--bg-card) which adapts. If they hate it I can revert.
+           BUT I will add a border-left or highlight.
+        */
+        border-radius: 10px;
+        padding: 12px 15px;
+        box-shadow: 0 2px 10px var(--shadow);
+        border: 1px solid var(--border);
+    }
+    
+    /* ADAPTIVE OVERRIDES */
+    /* If Dark Mode, ensure high contrast if we want. */
+    
+    .wp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+    .wp-title { font-family: var(--font-head); font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin: 0; }
+    .wp-count { font-size: 1rem; font-weight: 800; color: var(--text-main); font-family: var(--font-head); }
+    
+    .wp-mid-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+    .wp-big-number { font-family: var(--font-head); font-size: 2.2rem; color: var(--primary); line-height: 1; }
+    .wp-subtitle { font-size: 0.7rem; color: var(--text-muted); }
+    
+    .wp-bar-bg { width: 100%; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .wp-bar-fill { height: 100%; background: var(--primary); border-radius: 4px; }
+</style>

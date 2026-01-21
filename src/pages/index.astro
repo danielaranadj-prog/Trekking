@@ -1,0 +1,90 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AuthGuard from '../components/AuthGuard.astro';
+import StatsDashboard from '../components/StatsDashboard.astro';
+import Calendar from '../components/Calendar.astro';
+import ActivityModal from '../components/ActivityModal.astro';
+---
+
+<Layout title="Patagonia Tracker">
+    <AuthGuard>
+        <div class="app-container">
+            <!-- HEADER -->
+            <header class="app-header">
+                <div class="logo-area">
+                    <span class="logo-icon">🏔️</span>
+                    <div class="brand-title">
+                        <span class="brand-main">PATAGONIA</span>
+                        <span class="brand-orange">TRACKER</span>
+                    </div>
+                </div>
+                
+                <div class="header-actions">
+                     <button class="text-btn" id="logoutBtn">SALIR</button>
+                </div>
+            </header>
+    
+            <StatsDashboard />
+    
+            <main>
+                <Calendar />
+            </main>
+            
+            <ActivityModal />
+        </div>
+    </AuthGuard>
+</Layout>
+
+<script>
+    import { logoutUser } from '../stores/trainingStore';
+    const btn = document.getElementById('logoutBtn');
+    if(btn) btn.onclick = () => { if(confirm("¿Salir?")) logoutUser(); };
+</script>
+
+<style>
+    .app-container {
+        max-width: 600px;
+        margin: 0 auto;
+        min-height: 100vh;
+        background: var(--bg-main);
+        box-shadow: 0 0 50px var(--shadow);
+    }
+
+    .app-header {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 15px 20px;
+        background: var(--bg-main); /* Match main bg */
+        position: sticky; top: 0; z-index: 50;
+        border-bottom: 3px solid var(--bg-card); /* Subtle separate */
+    }
+
+    .logo-area { display: flex; align-items: center; gap: 8px; }
+    .logo-icon { font-size: 1.5rem; color: var(--primary); }
+    
+    .brand-title { display: flex; flex-direction: column; line-height: 0.9; }
+    .brand-main {
+        font-family: var(--font-head); color: var(--text-main); font-size: 1.1rem; letter-spacing: 0.5px;
+    }
+    .brand-orange {
+        font-family: var(--font-head); color: var(--primary); font-size: 1.1rem; letter-spacing: 0.5px;
+    }
+
+    .header-actions { display: flex; gap: 10px; }
+    
+    .text-btn {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        padding: 5px 12px;
+        border-radius: 4px;
+        font-family: var(--font-head);
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        transition: 0.2s;
+        cursor: pointer;
+    }
+    .text-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+</style>

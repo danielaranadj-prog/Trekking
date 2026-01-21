@@ -1,0 +1,93 @@
+---
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Tracker de entrenamiento físico" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=false" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Russo+One&display=swap" rel="stylesheet">
+		<title>{title}</title>
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>
+
+<style is:global>
+	/* THEME VARIABLES */
+	:root {
+		/* DEFAULT (DARK MODE) */
+		--primary: #ea580c;
+		--primary-hover: #c2410c;
+		
+		--bg-main: #0f172a;
+		--bg-card: #1e293b;
+		--bg-input: #0f172a;
+		
+		--text-main: #ffffff;
+		--text-muted: #94a3b8;
+		
+		--border: #334155;
+		--shadow: rgba(0,0,0,0.3);
+
+		--font-head: 'Russo One', sans-serif;
+		--font-body: 'Inter', sans-serif;
+	}
+
+	@media (prefers-color-scheme: light) {
+		:root {
+			/* LIGHT MODE OVERRIDES */
+			--bg-main: #f1f5f9;
+			--bg-card: #ffffff;
+			--bg-input: #ffffff;
+			
+			--text-main: #0f172a;
+			--text-muted: #64748b;
+			
+			--border: #e2e8f0;
+			--shadow: rgba(0,0,0,0.1);
+		}
+	}
+    
+    /* GLOBAL RESET */
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
+	html, body {
+		font-family: var(--font-body);
+		background: var(--bg-main);
+		color: var(--text-main);
+		margin: 0; padding: 0;
+		height: 100%;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	/* Common Utility Classes for Text Colors */
+	.text-primary { color: var(--primary) !important; }
+	.russo-font { font-family: var(--font-head); }
+    .hidden { display: none !important; }
+	
+	/* Global Inputs */
+	input, textarea, select {
+		background: var(--bg-input);
+		color: var(--text-main);
+		border: 1px solid var(--border);
+	}
+	input::placeholder { color: var(--text-muted); opacity: 0.7; }
+
+	/* Scrollbar */
+	::-webkit-scrollbar { width: 6px; }
+	::-webkit-scrollbar-track { background: var(--bg-main); }
+	::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>

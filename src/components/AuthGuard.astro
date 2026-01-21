@@ -1,0 +1,43 @@
+---
+import LoginView from './LoginView.astro';
+---
+
+<div id="auth-guard-container">
+    <!-- Unauthenticated State: Show Login -->
+    <div id="auth-login" class="hidden">
+        <LoginView />
+    </div>
+
+    <!-- Authenticated State: Show Content -->
+    <div id="auth-content" class="hidden">
+        <slot />
+    </div>
+    
+    <!-- Loading State (Optional, mostly handled by hidden toggles) -->
+</div>
+
+<script>
+    import { user, isLoadingAuth } from '../stores/trainingStore';
+
+    const loginDiv = document.getElementById('auth-login');
+    const contentDiv = document.getElementById('auth-content');
+
+    // Subscribe to Auth
+    // We can also subscribe to isLoadingAuth if we want a spinner
+    user.subscribe(currentUser => {
+        if (currentUser) {
+            // Logged In
+            loginDiv.classList.add('hidden');
+            contentDiv.classList.remove('hidden');
+        } else {
+            // Logged Out
+            loginDiv.classList.remove('hidden');
+            contentDiv.classList.add('hidden');
+        }
+    });
+</script>
+
+<style>
+    .hidden { display: none !important; }
+    #auth-guard-container { width: 100%; height: 100%; }
+</style>

@@ -1,0 +1,93 @@
+---
+// DayCard.astro
+const { date, title, icon, isCompleted, isToday, backpackWeight, hasMulti } = Astro.props;
+
+// Formatting
+const dayNum = date.getDate();
+const completedClass = isCompleted ? 'completed' : '';
+const todayClass = isToday ? 'today' : '';
+---
+
+<button class={`day-card ${completedClass} ${todayClass}`} type="button" data-date={date.toISOString()}>
+    <span class="day-number">{dayNum}</span>
+    
+    <div class="day-content">
+        <span class="day-icon">{icon}</span>
+        {backpackWeight > 0 && <span class="badge-weight">🎒</span>}
+    </div>
+    
+    <div class="day-label">{title}</div>
+    
+    {hasMulti && <div class="badge-multi">+</div>}
+</button>
+
+<style>
+    .day-card {
+        position: relative;
+        background: var(--bg-card); /* Slate 800 */
+        border: 1px solid #334155;  /* Slate 700 */
+        border-radius: 8px;
+        min-height: 80px; /* Large Target */
+        min-width: 60px; /* For horiz scroll */
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 5px;
+        transition: all 0.2s ease;
+        overflow: hidden;
+    }
+
+    /* STATES */
+    .day-card.completed {
+        border-color: var(--primary); /* Orange Border */
+        background: linear-gradient(180deg, rgba(252, 76, 2, 0.05) 0%, rgba(252, 76, 2, 0.0) 100%);
+    }
+
+    .day-card.today {
+        border: 2px solid var(--text-white); /* High vis for today */
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+    
+    .day-card:active {
+        transform: scale(0.95);
+        background: #334155;
+    }
+
+    /* TEXT & ICONS */
+    .day-number {
+        position: absolute; top: 4px; right: 6px;
+        font-size: 0.75rem; color: var(--text-muted); font-weight: 700;
+        font-family: var(--font-body);
+    }
+    .today .day-number { color: var(--text-white); }
+    .completed .day-number { color: var(--primary); }
+
+    .day-icon {
+        font-size: 1.6rem;
+        line-height: 1;
+        margin-bottom: 4px;
+        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+    }
+    
+    .day-label {
+        font-size: 0.6rem;
+        color: var(--text-gray);
+        text-transform: uppercase;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 600;
+    }
+    .completed .day-label { color: var(--text-white); }
+
+    /* BADGES */
+    .badge-weight {
+        font-size: 0.8rem; margin-left: -5px;
+    }
+    
+    .badge-multi {
+        position: absolute; bottom: 2px; right: 2px;
+        background: var(--primary); color: white;
+        width: 12px; height: 12px; border-radius: 50%;
+        font-size: 10px; line-height: 12px; text-align: center;
+    }
+</style>
