@@ -388,30 +388,78 @@
             margin: 0 auto;
         }
 
-        .month-block {
-            margin-bottom: 30px;
+        /* WEEKLY VIEW STYLES */
+        .week-block {
+            margin-bottom: 25px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #333;
         }
 
-        .month-header {
-            color: var(--primary);
+        .week-block.current-week {
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 15px rgba(255, 87, 34, 0.2);
+        }
+
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #333;
+        }
+
+        .week-title {
+            color: white;
             font-family: var(--font-head);
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-            border-left: 4px solid var(--primary);
-            padding-left: 10px;
+            font-size: 0.9rem;
             text-transform: uppercase;
         }
 
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
+        .week-dates {
+            font-size: 0.75rem;
+            color: #777;
+            font-weight: 600;
         }
 
-        .calendar-grid.filtered-mode {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
+        .week-row {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            /* Desktop: 7 columns */
+            gap: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .week-row {
+                /* Mobile: Horizontal Scroll for days in the week */
+                display: flex;
+                overflow-x: auto;
+                padding-bottom: 10px;
+                scrollbar-width: none;
+                gap: 10px;
+            }
+
+            .week-row::-webkit-scrollbar {
+                display: none;
+            }
+
+            .day-card {
+                min-width: 100px;
+                /* Fixed width for better touch targets */
+                min-height: 110px;
+            }
+
+            .day-card .activity-name {
+                display: block !important;
+                font-size: 0.7rem;
+            }
+
+            .day-card .activity-icon {
+                width: 32px;
+                height: 32px;
+            }
         }
 
         .day-header {
@@ -953,7 +1001,9 @@
     </div>
 
     <script>
-        const startDate = new Date(2026, 0, 6);
+        // Adjust START DATE to a Monday for clean weeks (Jan 5 is Mon, Jan 6 was Tue)
+        // User wants focus on Jan 19 week. 
+        const startDate = new Date(2026, 0, 5); // Monday Jan 5, 2026
         const tripDate = new Date(2026, 10, 1);
 
         let trackingData = JSON.parse(localStorage.getItem('patagoniaFinal_v6')) || {};
@@ -1019,114 +1069,119 @@
             const container = document.getElementById('main-container');
             container.innerHTML = '';
 
+            // Calculate start date (Monday of the start week)
             let currentDate = new Date(startDate);
-            let currentMonth = -1;
-            let monthGrid = null;
 
+            let weekCount = 1;
+
+            // Generate weeks
             while (currentDate <= tripDate) {
-                const month = currentDate.getMonth();
+                const weekEnd = new Date(currentDate);
+                weekEnd.setDate(currentDate.getDate() + 6);
+
                 const phase = getPhase(currentDate);
 
-                if (month !== currentMonth) {
-                    currentMonth = month;
-                    const monthBlock = document.createElement('div');
-                    monthBlock.className = 'month-block';
+                // Create Week Block
+                const weekBlock = document.createElement('div');
+                weekBlock.className = 'week-block';
 
-                    const monthTitle = document.createElement('div');
-                    monthTitle.className = 'month-header';
-                    monthTitle.innerText = currentDate.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
-                    monthBlock.appendChild(monthTitle);
+                // Highlight Target Week (Jan 19-25 or Today)
+                const today = new Date();
+                const isTargetWeek = (currentDate.getDate() === 19 && currentDate.getMonth() === 0 && currentDate.getFullYear() === 2026) ||
+                    (today >= currentDate && today <= weekEnd);
 
-                    if (filterType === 'all') {
-                        const headerRow = document.createElement('div');
-                        headerRow.className = 'calendar-grid';
-                        ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SÁB', 'DOM'].forEach(d => {
-                            const h = document.createElement('div');
-                            h.className = 'day-header';
-                            h.innerText = d;
-                            headerRow.appendChild(h);
-                        });
-                        monthBlock.appendChild(headerRow);
-                    }
-
-                    monthGrid = document.createElement('div');
-                    monthGrid.className = 'calendar-grid';
-                    if (filterType !== 'all') monthGrid.classList.add('filtered-mode');
-
-                    monthBlock.appendChild(monthGrid);
-                    container.appendChild(monthBlock);
-
-                    // Padding inicial para alinear días
-                    if (filterType === 'all') {
-                        let dayIndex = currentDate.getDay();
-                        let visualIndex = (dayIndex === 0) ? 6 : dayIndex - 1;
-                        for (let i = 0; i < visualIndex; i++) {
-                            const empty = document.createElement('div');
-                            empty.className = 'day-card empty';
-                            monthGrid.appendChild(empty);
-                        }
-                    }
+                if (isTargetWeek) {
+                    weekBlock.classList.add('current-week');
+                    weekBlock.id = 'target-week-scroll';
                 }
 
-                const dateId = currentDate.toISOString().split('T')[0];
-                const dayOfWeek = currentDate.getDay();
-                const routine = routines[dayOfWeek];
-                const entry = trackingData[dateId];
+                const startStr = currentDate.getDate();
+                const endStr = weekEnd.getDate();
+                const monthName = currentDate.toLocaleDateString('es-MX', { month: 'short' }).toUpperCase();
 
-                let showCard = true;
-                if (filterPhase !== 'all' && phase.id != filterPhase) showCard = false;
-                if (filterType !== 'all' && routine.type !== filterType) showCard = false;
+                weekBlock.innerHTML = `
+                    <div class="week-header">
+                        <div class="week-title">SEMANA ${weekCount} <span style="color:var(--primary)">//</span> FASE ${phase.id}</div>
+                        <div class="week-dates">${startStr} - ${endStr} ${monthName}</div>
+                    </div>
+                `;
 
-                if (showCard) {
-                    const card = document.createElement('div');
-                    card.className = 'day-card';
-                    if (entry && entry.completed) card.classList.add('completed');
-                    if (entry && (entry.note || entry.meals)) card.classList.add('has-note'); // Show dot for notes OR meals
+                const weekRow = document.createElement('div');
+                weekRow.className = 'week-row';
 
-                    card.onclick = () => openModal(dateId, dayOfWeek, phase, routine);
+                // Render 7 Days
+                for (let i = 0; i < 7; i++) {
+                    const dayOfWeek = currentDate.getDay(); // 0-6
+                    const routine = routines[dayOfWeek];
+                    const dateId = currentDate.toISOString().split('T')[0];
+                    const entry = trackingData[dateId];
 
-                    // LOGIC: Use entry.activityType if exists, else routine.type
-                    const displayType = (entry && entry.activityType) ? entry.activityType : routine.type;
+                    // Filter Logic
+                    let showCard = true;
+                    if (filterPhase !== 'all' && phase.id != filterPhase) showCard = false;
+                    if (filterType !== 'all' && routine.type !== filterType) showCard = false;
 
-                    // Map displayType to Icon ID
-                    // 'run' -> icon-cardio (user uses cardio icon for run)
-                    // 'hike' -> icon-cerro
-                    // 'swim' -> we use a new icon or fallback.
-                    let iconId = 'icon-cardio'; // Default
-                    if (displayType === 'gym') iconId = 'icon-gym';
-                    else if (displayType === 'rest') iconId = 'icon-rest';
-                    else if (displayType === 'cerro' || displayType === 'hike') iconId = 'icon-cerro';
-                    else if (displayType === 'swim') iconId = 'icon-rest'; // Fallback for now or use the generic one added
+                    if (showCard) {
+                        const card = document.createElement('div');
+                        card.className = 'day-card';
+                        if (entry && entry.completed) card.classList.add('completed');
+                        if (entry && (entry.note || entry.meals)) card.classList.add('has-note');
 
-                    // Get SVG content. If override ID doesn't exist, fallback to routine.icon
-                    const iconEl = document.getElementById(iconId) || document.getElementById(routine.icon);
-                    const svgHtml = iconEl.innerHTML;
+                        // Closure params
+                        const dIndex = dayOfWeek;
+                        const pId = phase;
+                        const rData = routine;
+                        const dId = dateId;
 
-                    const displayTitle = (entry && entry.title) ? entry.title : routine.title;
-                    const mealIndicator = (entry && entry.meals) ? '🍎' : '';
+                        card.onclick = () => openModal(dId, dIndex, pId, rData);
 
-                    card.innerHTML = `
-                        <div class="day-phase">F${phase.id}</div>
-                        <div class="day-date">${currentDate.getDate()}</div>
-                        <svg class="activity-icon" viewBox="0 0 24 24">${svgHtml}</svg>
-                        <div class="activity-name">${displayTitle} ${mealIndicator}</div>
-                    `;
-                    monthGrid.appendChild(card);
+                        const displayType = (entry && entry.activityType) ? entry.activityType : routine.type;
+
+                        let iconId = 'icon-cardio';
+                        if (displayType === 'gym') iconId = 'icon-gym';
+                        else if (displayType === 'rest') iconId = 'icon-rest';
+                        else if (displayType === 'cerro' || displayType === 'hike') iconId = 'icon-cerro';
+                        else if (displayType === 'swim') iconId = 'icon-rest';
+
+                        const iconEl = document.getElementById(iconId) || document.getElementById(routine.icon);
+                        const svgHtml = iconEl.innerHTML;
+
+                        const displayTitle = (entry && entry.title) ? entry.title : routine.title;
+                        const mealIndicator = (entry && entry.meals) ? '🍎' : '';
+
+                        const dayName = currentDate.toLocaleDateString('es-MX', { weekday: 'short' }).toUpperCase();
+
+                        card.innerHTML = `
+                            <div class="day-phase" style="right:0; left:auto; border-radius:0 0 0 4px;">${dayName}</div>
+                            <div class="day-date">${currentDate.getDate()}</div>
+                            <svg class="activity-icon" viewBox="0 0 24 24">${svgHtml}</svg>
+                            <div class="activity-name">${displayTitle} ${mealIndicator}</div>
+                        `;
+                        weekRow.appendChild(card);
+                    }
+
+                    // Advance Day
+                    currentDate.setDate(currentDate.getDate() + 1);
                 }
 
-                currentDate.setDate(currentDate.getDate() + 1);
+                if (weekRow.children.length > 0) {
+                    weekBlock.appendChild(weekRow);
+                    container.appendChild(weekBlock);
+                }
+
+                weekCount++;
             }
 
-            // LÓGICA ANTI-FANTASMA (Corrige lo de la captura de pantalla)
-            document.querySelectorAll('.month-block').forEach(block => {
-                const hasCards = block.querySelectorAll('.day-card:not(.empty)').length > 0;
-                if (!hasCards) {
-                    block.style.display = 'none';
-                } else {
-                    block.style.display = 'block';
+            // Scroll to Target
+            setTimeout(() => {
+                const target = document.getElementById('target-week-scroll');
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
-            });
+            }, 600);
         }
+
+
 
         function setPhaseFilter(val, btn) {
             filterPhase = val;
