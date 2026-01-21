@@ -1,568 +1,1160 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Patagonia 2026</title>
-    
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#121212">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Russo+One&display=swap" rel="stylesheet">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23FF5722%22><path d=%22M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z%22/></svg>">
+
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="icon.svg">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.svg">
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW failed', err));
+            });
+        }
+    </script>
 
     <style>
         :root {
-            --primary: #FF5722;
-            --bg-main: #121212;
-            --bg-card: #1E1E1E;
-            --text-white: #ffffff;
-            --text-gray: #90A4AE;
-            --success: #76FF03;
-            --font-head: 'Russo One', sans-serif;
-            --font-body: 'Montserrat', sans-serif;
+            /* STRAVA PALETTE */
+            --primary: #FC4C02;
+            --bg-main: #F0F0F0;
+            /* Light Gray */
+            --bg-card: #FFFFFF;
+            --text-main: #242428;
+            --text-sub: #6D6D78;
+            --border-color: #E6E6EB;
+            --nav-bg: #FFFFFF;
+
+            --success: #FC4C02;
+            /* Strava uses orange for almost everything */
+
+            --font-head: 'Manrope', sans-serif;
+            --font-body: 'Manrope', sans-serif;
+
+            --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --header-height: 60px;
+            --nav-height: 60px;
         }
 
-        body, html {
-            margin: 0; padding: 0;
+        body,
+        html {
+            margin: 0;
+            padding: 0;
             background-color: var(--bg-main);
-            color: var(--text-white);
+            color: var(--text-main);
             font-family: var(--font-body);
             -webkit-tap-highlight-color: transparent;
             overflow-x: hidden;
+            height: 100%;
         }
 
         /* --- LANDING PAGE --- */
         #landing-page {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #263238 0%, #000000 100%);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 9999; transition: opacity 0.6s ease, visibility 0.6s ease;
-        }
-        #landing-page.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        
-        .logo-icon-lg { width: 90px; height: 90px; fill: var(--primary); margin-bottom: 25px; filter: drop-shadow(0 0 15px rgba(255,87,34,0.6)); animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0% {transform: translateY(0px);} 50% {transform: translateY(-10px);} 100% {transform: translateY(0px);} }
-        .landing-title { font-family: var(--font-head); font-size: 2.5rem; text-align: center; line-height: 1.1; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 1px; }
-        .landing-title span { color: var(--primary); }
-        .start-btn { padding: 16px 50px; background: transparent; color: white; border: 2px solid var(--primary); font-family: var(--font-head); font-size: 1.2rem; cursor: pointer; border-radius: 50px; transition: all 0.3s; letter-spacing: 2px; text-transform: uppercase; }
-        .start-btn:active { transform: scale(0.95); background: var(--primary); }
-
-        /* --- MAIN APP --- */
-        #app-container { opacity: 0; transition: opacity 0.8s ease; }
-        #app-container.visible { opacity: 1; }
-
-        /* Sticky Header */
-        .sticky-wrapper {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            background: rgba(18, 18, 18, 0.98);
-            border-bottom: 1px solid #333;
-            padding: 15px 20px 10px 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
-            padding-top: env(safe-area-inset-top, 15px);
-        }
-
-        .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .header-brand { display: flex; align-items: center; gap: 10px; }
-        .logo-icon-sm { width: 30px; height: 30px; fill: var(--primary); }
-        .header-title h1 { font-family: var(--font-head); font-size: 1.1rem; margin: 0; line-height: 1; letter-spacing: 0.5px; }
-        .header-title span { color: var(--primary); }
-        .settings-btn { background: none; border: none; cursor: pointer; padding: 0; }
-        .settings-btn svg { width: 24px; height: 24px; fill: #555; transition: 0.3s; }
-        .settings-btn:hover svg { fill: white; transform: rotate(90deg); }
-
-        /* Stats HUD */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
-        .stat-card { background: #252525; padding: 8px 5px; border-radius: 6px; text-align: center; border-bottom: 2px solid var(--primary); display: flex; flex-direction: column; justify-content: center; }
-        .stat-card h3 { font-size: 0.55rem; color: #999; margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-card p { font-family: var(--font-head); font-size: 1.1rem; margin: 0; color: white; line-height: 1; }
-
-        /* --- NUEVO CONTROL PANEL (Fases + Dropdown) --- */
-        .control-panel { 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; /* Fases a la izq, Filtro a la der */
-            gap: 10px;
-            padding-top: 5px;
-        }
-
-        /* Fases (Scroll horizontal si es necesario) */
-        .phases-bar { display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; }
-        .phase-btn { background: #333; color: #888; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.65rem; white-space: nowrap; transition: 0.2s;}
-        .phase-btn.active { background: var(--primary); color: white; }
-
-        /* --- DROPDOWN PERSONALIZADO --- */
-        .filter-dropdown-container {
-            position: relative;
-            min-width: 140px; /* Ancho fijo para el botón */
-        }
-
-        .filter-trigger-btn {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            background: #252525;
-            border: 1px solid #444;
+            height: 100%;
+            background: var(--primary);
+            /* Strava Full Orange Splash */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+
+        #landing-page.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .logo-icon-lg {
+            width: 80px;
+            height: 80px;
+            fill: white;
+            margin-bottom: 20px;
+            animation: none;
+        }
+
+        .landing-title {
+            font-family: var(--font-head);
+            font-size: 2rem;
+            font-weight: 800;
             color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
+            letter-spacing: -0.5px;
+            margin-bottom: 40px;
+        }
+
+        .start-btn {
+            padding: 16px 60px;
+            background: white;
+            color: var(--primary);
+            border: none;
+            font-family: var(--font-head);
+            font-weight: 800;
+            font-size: 1rem;
             cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .start-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* --- MAIN LAYOUT --- */
+        #app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        #app-container.visible {
+            opacity: 1;
+        }
+
+        /* HEADER */
+        .sticky-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: var(--nav-bg);
+            border-bottom: 1px solid var(--border-color);
+            height: var(--header-height);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 0.7rem;
-            font-weight: 700;
-            transition: 0.2s;
+            padding: 0 16px;
+            padding-top: env(safe-area-inset-top, 0px);
+            height: calc(var(--header-height) + env(safe-area-inset-top, 0px));
         }
-        .filter-trigger-btn span { display: flex; align-items: center; gap: 6px; }
-        .filter-trigger-btn svg { width: 14px; height: 14px; fill: var(--primary); }
-        .filter-trigger-btn:active { transform: scale(0.98); }
 
-        /* Menú Oculto */
-        .filter-menu {
-            position: absolute;
-            top: 110%; right: 0;
-            width: 160px;
-            background: rgba(30, 30, 30, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid #444;
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            padding: 5px;
-            display: none; /* Oculto por defecto */
-            flex-direction: column;
-            gap: 2px;
-            z-index: 2000;
-            animation: slideDownMenu 0.2s ease forwards;
+        .header-brand {
+            font-family: var(--font-head);
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary);
+            letter-spacing: -0.5px;
         }
-        @keyframes slideDownMenu { from {opacity:0; transform: translateY(-10px);} to {opacity:1; transform: translateY(0);} }
 
-        .filter-menu.show { display: flex; }
+        .header-brand span {
+            color: var(--text-main);
+        }
 
-        .filter-option {
-            background: transparent;
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .icon-btn {
+            background: none;
             border: none;
-            color: #aaa;
-            padding: 10px;
-            text-align: left;
             cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: 600;
-            border-radius: 4px;
+            padding: 0;
             display: flex;
             align-items: center;
+        }
+
+        .icon-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--text-sub);
+        }
+
+        /* CONTENT AREA */
+        .content-view {
+            flex: 1;
+            overflow-y: auto;
+            padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px) + 10px);
+            padding-bottom: calc(var(--nav-height) + 20px);
+            padding-left: 12px;
+            padding-right: 12px;
+            display: none;
+            /* Hidden by default */
+        }
+
+        .content-view.active {
+            display: block;
+        }
+
+        /* BOTTOM NAV */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--nav-bg);
+            border-top: 1px solid var(--border-color);
+            height: var(--nav-height);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-sub);
+            background: none;
+            border: none;
+            cursor: pointer;
+            gap: 4px;
+        }
+
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+            fill: var(--text-sub);
+            transition: fill 0.2s;
+        }
+
+        .nav-item span {
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item.active svg {
+            fill: var(--primary);
+        }
+
+        /* --- FEED STYLES (HOME) --- */
+        .feed-header {
+            margin-bottom: 20px;
+        }
+
+        .feed-header h2 {
+            font-size: 1.5rem;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .feed-card {
+            background: var(--bg-card);
+            border-radius: 8px;
+            box-shadow: var(--shadow-subtle);
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .feed-card.highlight {
+            border-left: 4px solid var(--primary);
+        }
+
+        .feed-card.completed .card-status-icon {
+            fill: var(--primary);
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .avatar-placeholder {
+            width: 32px;
+            height: 32px;
+            background: #ddd;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .avatar-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .meta-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .meta-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .meta-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+        }
+
+        .card-body {
+            margin-bottom: 12px;
+        }
+
+        .workout-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin: 0 0 6px 0;
+            color: var(--text-main);
+        }
+
+        .workout-desc {
+            font-size: 0.9rem;
+            color: var(--text-main);
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .card-stats {
+            display: flex;
+            gap: 15px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .stat-pill {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            font-weight: 600;
+        }
+
+        .action-area {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+
+        .btn-record {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-record:disabled {
+            background: #ccc;
+            cursor: default;
+        }
+
+        /* --- CALENDAR STYLES (LOG) --- */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .month-block {
+            background: var(--bg-card);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .month-header {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-transform: capitalize;
+            color: var(--text-main);
+            border: none;
+            padding: 0;
+        }
+
+        .day-header {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-sub);
+            font-weight: 600;
+            padding: 4px 0;
+        }
+
+        /* New Bubble Style */
+        .day-bubble {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-main);
+            background: #F8F8F8;
+            border: 1px solid transparent;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .day-bubble.has-workout {
+            border-color: #ddd;
+            background: white;
+        }
+
+        .day-bubble.completed {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .day-bubble.today {
+            border: 2px solid var(--primary);
+        }
+
+        .day-bubble .bubble-dot {
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 4px;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.3s ease;
+            max-height: 90vh;
+            /* Allow scrolling on small screens */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-scroll-area {
+            overflow-y: auto;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .modal-header h2 {
+            color: var(--text-main);
+            margin: 0 0 5px 0;
+            font-size: 1.4rem;
+            font-weight: 800;
+            font-family: var(--font-head);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        /* --- NEW MODAL INPUTS --- */
+        .section-title {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            font-weight: 800;
+            text-transform: uppercase;
+            margin: 20px 0 10px 0;
+            letter-spacing: 0.5px;
+        }
+
+        .section-title:first-child {
+            margin-top: 0;
+        }
+
+        .type-selector {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
             gap: 8px;
-            transition: 0.2s;
-        }
-        .filter-option svg { width: 16px; height: 16px; fill: #666; transition: 0.2s; }
-        .filter-option:hover { background: rgba(255, 255, 255, 0.05); color: white; }
-        .filter-option:hover svg { fill: white; }
-        
-        .filter-option.selected { background: rgba(255, 87, 34, 0.15); color: var(--primary); }
-        .filter-option.selected svg { fill: var(--primary); }
-
-        /* --- SCROLL CONTENT --- */
-        .scroll-content {
-            padding-top: 230px; /* Ajustado para el nuevo header */
-            padding-left: 15px; padding-right: 15px; padding-bottom: 80px;
-            max-width: 1000px; margin: 0 auto;
+            margin-bottom: 20px;
         }
 
-        .month-block { margin-bottom: 30px; }
-        .month-header { 
-            color: var(--primary); font-family: var(--font-head); font-size: 1.1rem; 
-            margin-bottom: 10px; border-left: 4px solid var(--primary); padding-left: 10px;
+        .type-btn {
+            aspect-ratio: 1;
+            background: #f4f4f4;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .type-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: #777;
+            margin-bottom: 4px;
+        }
+
+        .type-btn span {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #777;
+        }
+
+        .type-btn.active {
+            border-color: var(--primary);
+            background: #ffeee5;
+            /* Light orange tint */
+        }
+
+        .type-btn.active svg {
+            fill: var(--primary);
+        }
+
+        .type-btn.active span {
+            color: var(--primary);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .modal-input {
+            width: 100%;
+            background: #F8F8F8;
+            border: 1px solid #ddd;
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+        }
+
+        .coach-suggestion {
+            background: #f9f9f9;
+            border: 1px dashed #ccc;
+            padding: 10px;
+            border-radius: 6px;
+            opacity: 0.8;
+            margin-top: 10px;
+        }
+
+        .coach-suggestion small {
+            font-weight: 800;
+            color: #888;
+            font-size: 0.7rem;
+        }
+
+        .coach-suggestion p {
+            margin: 4px 0 0 0;
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
             text-transform: uppercase;
         }
 
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        .calendar-grid.filtered-mode { display: flex; flex-wrap: wrap; gap: 8px; }
-        
-        .day-header { text-align: center; font-size: 0.6rem; color: #555; font-weight: 800; padding-bottom: 5px; }
-
-        .day-card { 
-            background: var(--bg-card); border-radius: 6px; padding: 8px 4px; min-height: 85px; 
-            cursor: pointer; position: relative; display: flex; flex-direction: column; 
-            align-items: center; justify-content: space-between; border: 1px solid transparent;
-            transition: transform 0.2s;
+        .btn-complete {
+            background: var(--primary);
+            color: white;
         }
-        .day-card:active { transform: scale(0.95); }
-        .day-card.completed { border-color: var(--success); background: #1a2e1e; }
-        .day-card.completed svg { fill: var(--success) !important; }
-        .day-card.completed .activity-name { color: var(--success); }
-        .day-card.has-note::after { content: ''; position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; background: white; border-radius: 50%; }
 
-        .day-phase { position: absolute; top: 0; left: 0; font-size: 0.5rem; background: #333; color: #aaa; padding: 2px 4px; border-bottom-right-radius: 4px; }
-        .day-date { font-size: 0.6rem; color: #555; font-weight: 700; align-self: flex-end; margin-right: 2px; }
-        .activity-icon { width: 24px; height: 24px; fill: #607D8B; margin-top: 4px; }
-        .activity-name { font-size: 0.6rem; text-align: center; color: white; line-height: 1.1; margin-bottom: 2px;}
-        
-        .day-card.empty { background: transparent; border: none; pointer-events: none; }
-        .calendar-grid.filtered-mode .day-card { width: 90px; }
-
-        /* MODALS */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; }
-        .modal-content { background: #1a1a1a; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; border: 1px solid #444; max-height: 90vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .modal-header h2 { color: var(--primary); margin: 0; font-family: var(--font-head); font-size: 1.3rem; }
-        .close-btn { background: none; border: none; color: #777; font-size: 1.5rem; cursor: pointer; }
-        .coach-note { background: #111; padding: 10px; border-radius: 6px; border-left: 3px solid var(--primary); margin-bottom: 20px; }
-        .journal-input { width: 100%; background: #222; border: 1px solid #444; color: white; padding: 10px; border-radius: 6px; margin-bottom: 15px; box-sizing: border-box; font-family: sans-serif; resize: vertical; min-height: 80px;}
-        .action-btn { width: 100%; padding: 15px; border: none; border-radius: 6px; font-family: var(--font-head); font-size: 1rem; cursor: pointer; text-transform: uppercase; }
-        .btn-complete { background: var(--success); color: #000; }
-        .btn-undo { background: #333; color: #ccc; }
-
-        /* SETTINGS MODAL */
-        #settingsModal .settings-option { background: #222; padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-small { background: var(--primary); color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.8rem; }
-
-        @media (max-width: 600px) {
-            .scroll-content { padding-top: 240px; padding-left: 5px; padding-right: 5px; }
-            .calendar-grid { grid-template-columns: repeat(7, minmax(35px, 1fr)); gap: 3px; }
-            .day-card { min-height: 55px; padding: 2px; }
-            .activity-icon { width: 18px; height: 18px; }
-            .activity-name { display: none; }
-            .day-phase { display: none; }
-            .calendar-grid.filtered-mode .day-card { width: 48%; min-height: 90px; }
-            .calendar-grid.filtered-mode .activity-name { display: block; }
-            .landing-title { font-size: 2.2rem; }
-            /* header elements */
-            .main-header { margin-bottom: 5px; }
-            .dashboard-grid { margin-bottom: 5px; }
+        .btn-undo {
+            background: #EEE;
+            color: #555;
         }
     </style>
 </head>
+
 <body>
 
     <div style="display: none;">
-        <svg id="icon-cerro" viewBox="0 0 24 24"><path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/></svg>
-        <svg id="icon-gym" viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 5.57 2 7.71 3.43 9.14 2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 18.43 22 16.29z"/></svg>
-        <svg id="icon-cardio" viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
-        <svg id="icon-rest" viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-        <svg id="icon-filter" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+        <!-- ICONS (Updated for Strava Style: simplified) -->
+        <!-- Reuse existing SVGs but they will be styled via CSS -->
+        <svg id="icon-cerro" viewBox="0 0 24 24">
+            <path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z" />
+        </svg>
+        <svg id="icon-gym" viewBox="0 0 24 24">
+            <path
+                d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 5.57 2 7.71 3.43 9.14 2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 18.43 22 16.29z" />
+        </svg>
+        <svg id="icon-cardio" viewBox="0 0 24 24">
+            <path
+                d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7" />
+        </svg>
+        <svg id="icon-rest" viewBox="0 0 24 24">
+            <path
+                d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+        </svg>
+        <svg id="icon-filter" viewBox="0 0 24 24">
+            <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
+        </svg>
     </div>
 
     <div id="landing-page">
-        <svg class="logo-icon-lg" viewBox="0 0 24 24"><path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/></svg>
-        <div class="landing-title">PATAGONIA<br><span>TREKKING 2026</span></div>
-        <button class="start-btn" onclick="enterApp()">INGRESAR</button>
+        <!-- SVG Logo -->
+        <svg class="logo-icon-lg" viewBox="0 0 24 24">
+            <path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z" />
+        </svg>
+        <div class="landing-title">PATAGONIA 2026</div>
+        <button class="start-btn" onclick="enterApp()">Connect</button>
     </div>
 
     <div id="app-container">
+        <!-- TOP HEADER -->
         <div class="sticky-wrapper">
-            <div class="main-header">
-                <div class="header-brand">
-                    <svg class="logo-icon-sm" viewBox="0 0 24 24"><path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/></svg>
-                    <div class="header-title"><h1>PATAGONIA <span>TREKKING</span></h1></div>
-                </div>
-                <button class="settings-btn" onclick="openSettings()">
-                    <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z"/></svg>
+            <div class="header-brand">PATAGONIA <span>TRAINING</span></div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="alert('Settings')">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z" />
+                    </svg>
                 </button>
             </div>
+        </div>
 
-            <div class="dashboard-grid">
-                <div class="stat-card"><h3>DÍAS RESTANTES</h3><p id="daysLeft">...</p></div>
-                <div class="stat-card"><h3>ENTRENOS COMPLETOS</h3><p id="completedCount">0</p></div>
-                <div class="stat-card"><h3>FASE ACTUAL</h3><p id="currentPhaseLabel" style="font-size: 0.9rem; line-height: 1.1rem; color: var(--primary)">...</p></div>
+        <!-- VIEW: FEED -->
+        <div id="view-feed" class="content-view active">
+            <div class="feed-header">
+                <h2>Activity Feed</h2>
             </div>
+            <div id="feed-container">
+                <!-- Feed Cards Injected Here -->
+            </div>
+        </div>
 
-            <div class="control-panel">
-                <div class="phases-bar">
-                    <button class="phase-btn active" onclick="setPhaseFilter('all', this)">VER TODO</button>
-                    <button class="phase-btn" onclick="setPhaseFilter(1, this)">FASE 1</button>
-                    <button class="phase-btn" onclick="setPhaseFilter(2, this)">FASE 2</button>
-                    <button class="phase-btn" onclick="setPhaseFilter(3, this)">FASE 3</button>
+        <!-- VIEW: CALENDAR (Log) -->
+        <div id="view-calendar" class="content-view">
+            <div class="feed-header">
+                <h2>Training Log</h2>
+            </div>
+            <div id="calendar-container"></div>
+        </div>
+
+        <!-- VIEW: PROFILE -->
+        <div id="view-profile" class="content-view">
+            <div style="text-align:center; margin-top:40px;">
+                <div
+                    style="width:100px; height:100px; background:#ddd; border-radius:50%; margin:0 auto 20px auto; overflow:hidden; border:4px solid white; box-shadow:0 5px 15px rgba(0,0,0,0.1);">
+                    <img src="https://ui-avatars.com/api/?name=Adventurer&background=FC4C02&color=fff&size=200"
+                        style="width:100%">
                 </div>
-                
-                <div class="filter-dropdown-container">
-                    <button class="filter-trigger-btn" onclick="toggleFilterMenu()">
-                        <span id="filterLabel">
-                            <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
-                            TODOS
-                        </span>
-                        <span>▼</span>
-                    </button>
-                    <div id="filterMenu" class="filter-menu">
-                        <button class="filter-option selected" onclick="setTypeFilter('all', this, 'TODOS')">
-                            <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg> TODOS
-                        </button>
-                        <button class="filter-option" onclick="setTypeFilter('cerro', this, 'CERRO')">
-                            <svg viewBox="0 0 24 24"><path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/></svg> CERRO
-                        </button>
-                        <button class="filter-option" onclick="setTypeFilter('gym', this, 'GYM')">
-                            <svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 5.57 2 7.71 3.43 9.14 2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 18.43 22 16.29z"/></svg> GYM
-                        </button>
-                        <button class="filter-option" onclick="setTypeFilter('cardio', this, 'CARDIO')">
-                            <svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg> CARDIO
-                        </button>
-                        <button class="filter-option" onclick="setTypeFilter('rest', this, 'RELAX')">
-                            <svg viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> RELAX
-                        </button>
+                <h2 style="margin:0;">Athlete</h2>
+                <p style="color:#666; margin:5px 0 30px 0;">Patagonia 2026 Training</p>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; max-width:400px; margin:0 auto;">
+                    <div style="background:white; padding:20px; border-radius:8px; box-shadow:var(--shadow-subtle);">
+                        <div style="font-size:2rem; font-weight:800; color:var(--primary);" id="completedCount">0</div>
+                        <div style="font-size:0.8rem; color:#666; font-weight:700;">ACTIVITIES</div>
                     </div>
+                    <div style="background:white; padding:20px; border-radius:8px; box-shadow:var(--shadow-subtle);">
+                        <div style="font-size:2rem; font-weight:800; color:var(--text-main);" id="daysLeft">...</div>
+                        <div style="font-size:0.8rem; color:#666; font-weight:700;">DAYS TO GO</div>
+                    </div>
+                </div>
+
+                <div style="margin-top:30px; padding:20px;">
+                    <button class="start-btn" style="width:100%; border:1px solid #ddd; background:white; color:#333;"
+                        onclick="exportData()">Export Data</button>
+                    <input type="file" id="fileInput" accept=".json" onchange="importData(this)" style="display:none">
+                    <button class="start-btn"
+                        style="width:100%; border:1px solid #ddd; background:white; color:#333; margin-top:10px;"
+                        onclick="document.getElementById('fileInput').click()">Import Data</button>
                 </div>
             </div>
         </div>
 
-        <div class="scroll-content">
-            <div id="main-container"></div>
+        <!-- BOTTOM NAV -->
+        <div class="bottom-nav">
+            <button class="nav-item active" onclick="switchView('feed', this)">
+                <svg viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                </svg>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" onclick="switchView('calendar', this)">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
+                </svg>
+                <span>Log</span>
+            </button>
+            <button class="nav-item" onclick="switchView('profile', this)">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+                </svg>
+                <span>Profile</span>
+            </button>
         </div>
     </div>
 
+    <!-- MODAL (Flexible Logging) -->
     <div id="modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalDate">FECHA</h2>
+                <h2 id="modalDate">DATE</h2>
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
-            <div style="margin-bottom: 20px;">
-                <h3 id="modalTitle" style="color: white; margin-bottom: 10px;">ACTIVIDAD</h3>
-                <p id="modalDescription" style="color: #aaa; line-height: 1.5; font-size: 0.9rem;">Detalle...</p>
-                <div class="coach-note">
-                    <small style="color:var(--primary); font-weight:bold;">CONSEJO:</small>
-                    <p id="modalNote" style="margin:5px 0 0 0; color:#ddd; font-style:italic;">...</p>
+
+            <div class="modal-scroll-area">
+                <!-- ACTIVITY SELECTOR -->
+                <div class="section-title">CHOOSE ACTIVITY</div>
+                <div class="type-selector" id="typeSelector">
+                    <button class="type-btn" onclick="selectType('run')" data-type="run">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7" />
+                        </svg>
+                        <span>Run</span>
+                    </button>
+                    <button class="type-btn" onclick="selectType('gym')" data-type="gym">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 5.57 2 7.71 3.43 9.14 2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 18.43 22 16.29z" />
+                        </svg>
+                        <span>Gym</span>
+                    </button>
+                    <button class="type-btn" onclick="selectType('hike')" data-type="hike">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z" />
+                        </svg>
+                        <span>Hike</span>
+                    </button>
+                    <button class="type-btn" onclick="selectType('rest')" data-type="rest">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                        </svg>
+                        <span>Rest</span>
+                    </button>
+                    <button class="type-btn" onclick="selectType('swim')" data-type="swim">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M20.65 11l.35-2-1.35-.65C19.25 7.05 17.5 7 17.5 7c-2.55 0-4.65 1.55-5.5 3h-2.15c-.6-1.55-2.05-3.3-5-4L4 6.75l1.35.5C5.05 9.05 6.45 10 8 10h4c.95 0 2-.45 2.55-1.15.55.95 2.15 2.5 4.5 2.5 1.4 0 2.45-.4 3-.75l-1.4-.6z" />
+                        </svg>
+                        <span>Other</span>
+                    </button>
                 </div>
-                <textarea id="journalInput" class="journal-input" placeholder="Bitácora (ej. Me sentí bien...)"></textarea>
+
+                <!-- EDITABLE DETAILS -->
+                <div class="input-group">
+                    <label>Title</label>
+                    <input type="text" id="inputTitle" placeholder="Morning Run, Leg Day..." class="modal-input">
+                </div>
+
+                <div class="input-group">
+                    <label>Notes / Stats</label>
+                    <textarea id="inputDesc" class="modal-input" placeholder="Distance, time, how it felt..."
+                        rows="2"></textarea>
+                </div>
+
+                <!-- COACH SUGGESTION (Read Only) -->
+                <div class="coach-suggestion" id="coachSection">
+                    <small>PLAN SUGGESTION:</small>
+                    <p id="coachText">...</p>
+                </div>
+
+                <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
+
+                <!-- NUTRITION SECTION -->
+                <div class="section-title">NUTRITION LOG 🍎</div>
+
+                <div class="input-group">
+                    <label>Meals</label>
+                    <textarea id="inputMeals" class="modal-input"
+                        placeholder="Breakfast: Oats... Lunch: Chicken... Dinner: Salad..." rows="3"></textarea>
+                </div>
             </div>
-            <button id="completeBtn" class="action-btn btn-complete" onclick="toggleComplete()">MARCAR COMPLETADO</button>
+
+            <div class="modal-footer">
+                <button id="saveBtn" class="action-btn btn-complete" onclick="saveActivity()">SAVE ACTIVITY</button>
+            </div>
         </div>
     </div>
 
+    <!-- SETTINGS MODAL -->
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>AJUSTES</h2>
+                <h2>SETTINGS</h2>
                 <button class="close-btn" onclick="closeSettings()">&times;</button>
             </div>
             <div class="settings-option">
-                <div><h4>Exportar Datos</h4></div>
-                <button class="btn-small" onclick="exportData()">GUARDAR</button>
+                <div>
+                    <h4>Export Data</h4>
+                </div>
+                <button class="btn-small" onclick="exportData()">SAVE</button>
             </div>
             <div class="settings-option">
-                <div><h4>Importar Datos</h4></div>
-                <button class="btn-small" onclick="document.getElementById('fileInput').click()">CARGAR</button>
+                <div>
+                    <h4>Import Data</h4>
+                </div>
+                <button class="btn-small" onclick="document.getElementById('fileInput').click()">LOAD</button>
                 <input type="file" id="fileInput" accept=".json" onchange="importData(this)" style="display:none">
             </div>
         </div>
     </div>
 
     <script>
-        const startDate = new Date(2026, 0, 6);
+        const startDate = new Date(2026, 0, 21); // Jan 21, 2026
         const tripDate = new Date(2026, 10, 1);
-        
-        let trackingData = JSON.parse(localStorage.getItem('patagoniaFinal_v6')) || {};
-        let filterPhase = 'all';
-        let filterType = 'all';
-        let selectedDateId = null;
 
-        const phases = [
-            { id: 1, name: "FASE 1: BASE", endMonth: 2 },
-            { id: 2, name: "FASE 2: FUERZA", endMonth: 6 },
-            { id: 3, name: "FASE 3: RESIST", endMonth: 9 },
-            { id: 4, name: "TAPERING", endMonth: 10 }
+        function vibrate(pattern = 10) {
+            if (navigator.vibrate) navigator.vibrate(pattern);
+        }
+
+        let trackingData = JSON.parse(localStorage.getItem('patagoniaFinal_v8')) || {}; // Version bumped
+        let selectedDateId = null;
+        let selectedType = 'run'; // Default temp state
+
+        const activityTypes = {
+            rest: { icon: "M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" },
+            run: { icon: "M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7" },
+            cardio: { icon: "M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7" }, // Alias for run icon
+            gym: { icon: "M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 5.57 2 7.71 3.43 9.14 2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 18.43 22 16.29z" },
+            hike: { icon: "M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z" },
+            cerro: { icon: "M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z" }, // Alias
+            swim: { icon: "M20.65 11l.35-2-1.35-.65C19.25 7.05 17.5 7 17.5 7c-2.55 0-4.65 1.55-5.5 3h-2.15c-.6-1.55-2.05-3.3-5-4L4 6.75l1.35.5C5.05 9.05 6.45 10 8 10h4c.95 0 2-.45 2.55-1.15.55.95 2.15 2.5 4.5 2.5 1.4 0 2.45-.4 3-.75l-1.4-.6z" }
+        };
+
+        // --- PLAN CONFIGURATION (Kept for suggestions) ---
+        // Using concise structure to save space
+        const defaults = {
+            rest: { type: 'rest', title: 'Rest Day', desc: 'Active recovery or sleep.' },
+            run: { type: 'run', title: 'Run / Cardio', desc: 'Zone 2 running.' },
+            gym: { type: 'gym', title: 'Strength Training', desc: 'Focus on legs and core.' },
+            hike: { type: 'hike', title: 'Hike / Cerro', desc: 'Get some elevation.' }
+        };
+
+        // Simplified Blocks for suggestions
+        const trainingBlocks = [
+            { name: "Base", weekS: 1, weekE: 4, schedule: { 1: defaults.rest, 2: defaults.run, 3: defaults.gym, 4: defaults.run, 5: defaults.rest, 6: defaults.hike, 0: defaults.rest } },
+            { name: "Strength", weekS: 5, weekE: 8, schedule: { 1: defaults.rest, 2: defaults.run, 3: defaults.gym, 4: defaults.run, 5: defaults.rest, 6: defaults.hike, 0: defaults.rest } },
+            { name: "Endurance", weekS: 9, weekE: 20, schedule: { 1: defaults.rest, 2: defaults.hike, 3: defaults.gym, 4: defaults.run, 5: defaults.rest, 6: defaults.hike, 0: defaults.rest } }
         ];
 
-        const routines = {
-            1: { title: "Relax / Yoga", type: "rest", icon: "icon-rest", desc: "Estiramiento o caminata suave.", note: "Recuperación activa." },
-            2: { title: "Cardio Z2", type: "cardio", icon: "icon-cardio", desc: "40 min trote suave.", note: "Base aeróbica." },
-            3: { title: "Gym Pierna", type: "gym", icon: "icon-gym", desc: "Sentadillas y Lunges.", note: "Piensa en el Fitz Roy." },
-            4: { title: "Intervalos", type: "cardio", icon: "icon-cardio", desc: "30 min cambios de ritmo.", note: "Ganando aire." },
-            5: { title: "Descanso Total", type: "rest", icon: "icon-rest", desc: "Dormir bien y comer.", note: "El músculo crece hoy." },
-            6: { title: "Día de Cerro", type: "cerro", icon: "icon-cerro", desc: "Salida a ruta.", note: "Conexión total." },
-            0: { title: "Cerro / Relax", type: "cerro", icon: "icon-cerro", desc: "Opción B de montaña.", note: "Disfruta." }
-        };
+        function getWeeksFromStart(date) {
+            const timeDiff = date.getTime() - startDate.getTime();
+            if (timeDiff < 0) return 0;
+            const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
+            return Math.floor(daysDiff / 7) + 1;
+        }
+
+        function getTrainingBlock(weekNum) {
+            if (weekNum < 1) return trainingBlocks[0];
+            return trainingBlocks.find(b => weekNum >= b.weekS && weekNum <= b.weekE) || trainingBlocks[trainingBlocks.length - 1];
+        }
 
         function enterApp() {
             document.getElementById('landing-page').classList.add('hidden');
             document.getElementById('app-container').classList.add('visible');
+            vibrate(20);
+            setTimeout(() => {
+                const today = new Date();
+                const id = today.toISOString().split('T')[0];
+                const el = document.getElementById('card-' + id);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 500);
         }
 
-        // Auto-run
-        (function() {
-            renderCalendar();
-            updateStats();
-        })();
-
-        // --- DROPDOWN LOGIC ---
-        function toggleFilterMenu() {
-            document.getElementById('filterMenu').classList.toggle('show');
+        function switchView(viewName, btn) {
+            vibrate(5);
+            document.querySelectorAll('.content-view').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewName).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+            if (viewName === 'calendar') renderCalendar();
+            if (viewName === 'feed') renderFeed();
+            if (viewName === 'profile') updateStats();
         }
-        
-        // Cierra el menú si haces clic fuera
-        window.onclick = function(event) {
-            if (!event.target.matches('.filter-trigger-btn') && !event.target.closest('.filter-trigger-btn')) {
-                var dropdowns = document.getElementsByClassName("filter-menu");
-                for (var i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
+
+        // --- FEED RENDERER ---
+        function renderFeed() {
+            const container = document.getElementById('feed-container');
+            container.innerHTML = '';
+
+            const today = new Date();
+            for (let i = 0; i < 4; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+
+                const dateId = date.toISOString().split('T')[0];
+                const weekNum = getWeeksFromStart(date);
+                const block = getTrainingBlock(weekNum);
+                const dayOfWeek = date.getDay();
+                // Get Suggestion
+                const suggestion = block.schedule[dayOfWeek] || block.schedule[0];
+                // Get Actual User Data
+                const entry = trackingData[dateId];
+
+                // If entry exists, use its data. If not, use suggestion as "Planned".
+                const type = entry ? (entry.activityType || suggestion.type) : suggestion.type;
+                const title = entry ? (entry.title || suggestion.title) : suggestion.title;
+                const desc = entry ? (entry.description || suggestion.desc) : suggestion.desc;
+                const isCompleted = entry && entry.completed;
+
+                // Resolve Icon
+                // Map 'cerro' -> 'hike', 'cardio' -> 'run' for visuals if needed, or strict lookups
+                let iconPath = activityTypes[type] ? activityTypes[type].icon : activityTypes.run.icon;
+                if (!activityTypes[type]) {
+                    // Fallback alias handling
+                    if (type === 'cerro') iconPath = activityTypes.hike.icon;
+                    else if (type === 'cardio') iconPath = activityTypes.run.icon;
                 }
+
+                const isToday = (i === 0);
+                const displayDate = isToday ? "Today" : date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+                const card = document.createElement('div');
+                card.className = `feed-card ${isToday ? 'highlight' : ''} ${isCompleted ? 'completed' : ''}`;
+
+                let mealIndicator = (entry && entry.meals) ? `<span style="font-size:0.8rem; margin-left:5px;">🍎</span>` : '';
+
+                card.innerHTML = `
+                    <div class="card-meta">
+                        <div class="avatar-placeholder">
+                             <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:${isCompleted ? 'var(--primary)' : '#eee'}">
+                                <svg style="width:16px; height:16px; fill:${isCompleted ? 'white' : '#777'}" viewBox="0 0 24 24">
+                                    <path d="${iconPath}"/>
+                                </svg>
+                             </div>
+                        </div>
+                        <div class="meta-text">
+                            <div class="meta-title">${title} ${mealIndicator}</div>
+                            <div class="meta-subtitle">${displayDate}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        ${isCompleted ? '' : `<div style="font-size:0.75rem; color:var(--primary); font-weight:700; margin-bottom:4px;">SUGGESTED: ${suggestion.title}</div>`}
+                        <p class="workout-desc" style="color:${isCompleted ? '#333' : '#666'}">${desc}</p>
+                    </div>
+
+                    <div class="action-area">
+                        <button class="btn-record" onclick="openModal('${dateId}')" 
+                                style="background: ${isCompleted ? '#fff' : 'var(--primary)'}; 
+                                       color:${isCompleted ? 'var(--primary)' : 'white'};
+                                       border: ${isCompleted ? '1px solid var(--border-color)' : 'none'}">
+                            ${isCompleted ? 'Edit Activity' : 'Log Activity'}
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
             }
         }
 
-        function getPhase(date) {
-            const month = date.getMonth();
-            if (month <= 2) return phases[0];
-            if (month <= 6) return phases[1];
-            if (month <= 9) return phases[2];
-            return phases[3];
-        }
-
+        // --- CALENDAR RENDERER ---
         function renderCalendar() {
-            const container = document.getElementById('main-container');
+            const container = document.getElementById('calendar-container');
             container.innerHTML = '';
-            
+
             let currentDate = new Date(startDate);
             let currentMonth = -1;
             let monthGrid = null;
 
             while (currentDate <= tripDate) {
                 const month = currentDate.getMonth();
-                const phase = getPhase(currentDate);
+                const weekNum = getWeeksFromStart(currentDate);
+                const block = getTrainingBlock(weekNum);
 
                 if (month !== currentMonth) {
                     currentMonth = month;
                     const monthBlock = document.createElement('div');
                     monthBlock.className = 'month-block';
-                    
-                    const monthTitle = document.createElement('div');
-                    monthTitle.className = 'month-header';
-                    monthTitle.innerText = currentDate.toLocaleDateString('es-MX', {month: 'long', year: 'numeric'});
-                    monthBlock.appendChild(monthTitle);
+                    monthBlock.innerHTML = `<div class="month-header">${currentDate.toLocaleDateString('en-US', { month: 'long' })}</div>`;
 
-                    if (filterType === 'all') {
-                        const headerRow = document.createElement('div');
-                        headerRow.className = 'calendar-grid';
-                        ['LUN','MAR','MIE','JUE','VIE','SÁB','DOM'].forEach(d => {
-                            const h = document.createElement('div');
-                            h.className = 'day-header';
-                            h.innerText = d;
-                            headerRow.appendChild(h);
-                        });
-                        monthBlock.appendChild(headerRow);
-                    }
+                    const headerRow = document.createElement('div');
+                    headerRow.className = 'calendar-grid';
+                    ['M', 'T', 'W', 'T', 'F', 'S', 'S'].forEach(d => headerRow.innerHTML += `<div class="day-header">${d}</div>`);
+                    monthBlock.appendChild(headerRow);
 
                     monthGrid = document.createElement('div');
                     monthGrid.className = 'calendar-grid';
-                    if (filterType !== 'all') monthGrid.classList.add('filtered-mode');
-                    
                     monthBlock.appendChild(monthGrid);
                     container.appendChild(monthBlock);
 
-                    // Padding inicial para alinear días
-                    if (filterType === 'all') {
-                        let dayIndex = currentDate.getDay(); 
-                        let visualIndex = (dayIndex === 0) ? 6 : dayIndex - 1; 
-                        for(let i=0; i<visualIndex; i++) {
-                            const empty = document.createElement('div');
-                            empty.className = 'day-card empty';
-                            monthGrid.appendChild(empty);
-                        }
-                    }
+                    let dayIndex = currentDate.getDay();
+                    let visualIndex = (dayIndex === 0) ? 6 : dayIndex - 1;
+                    for (let i = 0; i < visualIndex; i++) monthGrid.appendChild(document.createElement('div'));
                 }
 
                 const dateId = currentDate.toISOString().split('T')[0];
-                const dayOfWeek = currentDate.getDay();
-                const routine = routines[dayOfWeek];
                 const entry = trackingData[dateId];
-                
-                let showCard = true;
-                if (filterPhase !== 'all' && phase.id != filterPhase) showCard = false;
-                if (filterType !== 'all' && routine.type !== filterType) showCard = false;
 
-                if (showCard) {
-                    const card = document.createElement('div');
-                    card.className = 'day-card';
-                    if (entry && entry.completed) card.classList.add('completed');
-                    if (entry && entry.note) card.classList.add('has-note');
-                    
-                    card.onclick = () => openModal(dateId, dayOfWeek, phase, routine);
-                    
-                    const svgHtml = document.getElementById(routine.icon).innerHTML;
-                    
-                    card.innerHTML = `
-                        <div class="day-phase">F${phase.id}</div>
-                        <div class="day-date">${currentDate.getDate()}</div>
-                        <svg class="activity-icon" viewBox="0 0 24 24">${svgHtml}</svg>
-                        <div class="activity-name">${routine.title}</div>
-                    `;
-                    monthGrid.appendChild(card);
+                const bubble = document.createElement('div');
+                bubble.className = `day-bubble ${entry && entry.completed ? 'completed' : ''}`;
+
+                // Color code by activity type if completed
+                if (entry && entry.completed) {
+                    if (entry.activityType === 'rest') bubble.style.backgroundColor = '#ccc'; // Grey for rest
+                    // other colors if needed, otherwise Orange default
                 }
 
+                const todayStr = new Date().toISOString().split('T')[0];
+                if (dateId === todayStr) bubble.classList.add('today');
+
+                bubble.innerHTML = `${currentDate.getDate()}`;
+                bubble.onclick = () => openModal(dateId);
+                monthGrid.appendChild(bubble);
                 currentDate.setDate(currentDate.getDate() + 1);
             }
-            
-            // LÓGICA ANTI-FANTASMA (Corrige lo de la captura de pantalla)
-            document.querySelectorAll('.month-block').forEach(block => {
-                const hasCards = block.querySelectorAll('.day-card:not(.empty)').length > 0;
-                if (!hasCards) {
-                    block.style.display = 'none';
-                } else {
-                    block.style.display = 'block';
-                }
-            });
         }
 
-        function setPhaseFilter(val, btn) {
-            filterPhase = val;
-            document.querySelectorAll('.phase-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderCalendar();
+        // --- LOGGING MODAL LOGIC ---
+        function selectType(type) {
+            selectedType = type;
+            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.querySelector(`.type-btn[data-type="${type}"]`);
+            if (btn) btn.classList.add('active');
+            vibrate(5);
         }
 
-        function setTypeFilter(val, btnElement, label) {
-            filterType = val;
-            
-            // Actualizar Label del Dropdown
-            const iconSvg = btnElement.querySelector('svg').outerHTML;
-            document.getElementById('filterLabel').innerHTML = iconSvg + " " + label;
+        function openModal(dateId) {
+            vibrate(10);
+            selectedDateId = dateId;
+            const d = new Date(dateId + "T00:00:00");
+            const entry = trackingData[dateId];
 
-            // Actualizar estado visual del menú
-            document.querySelectorAll('.filter-option').forEach(b => b.classList.remove('selected'));
-            btnElement.classList.add('selected');
-            
-            renderCalendar();
-        }
+            // Get Suggestions
+            const weekNum = getWeeksFromStart(d);
+            const block = getTrainingBlock(weekNum);
+            const dayOfWeek = d.getDay();
+            const suggestion = block.schedule[dayOfWeek] || block.schedule[0];
 
-        function openModal(dateStr, dayOfWeek, phase, routine) {
-            selectedDateId = dateStr;
-            const entry = trackingData[dateStr];
             document.getElementById('modal').style.display = 'flex';
-            
-            const parts = dateStr.split('-');
-            const d = new Date(parts[0], parts[1]-1, parts[2]); 
-            
-            document.getElementById('modalDate').innerText = d.toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long'}).toUpperCase();
-            document.getElementById('modalTitle').innerText = routine.title;
-            
-            let desc = routine.desc;
-            if (routine.type === 'cerro') {
-                if (phase.id === 1) desc = "Cerro San Juan (Mitad) o La Cruz. Sin peso extra.";
-                if (phase.id === 2) desc = "Cerro San Juan Completo. Botas nuevas y mochila 4kg.";
-                if (phase.id === 3) desc = "Ruta Larga (10km+). Mochila peso real (8kg).";
-            }
-            document.getElementById('modalDescription').innerText = desc;
-            document.getElementById('modalNote').innerText = routine.note;
-            document.getElementById('journalInput').value = entry ? (entry.note || "") : "";
+            document.getElementById('modalDate').innerText = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
 
-            const btn = document.getElementById('completeBtn');
-            if(entry && entry.completed) {
-                btn.innerText = "DESMARCAR";
-                btn.className = "action-btn btn-undo";
+            // Fill UI
+            if (entry && entry.completed) {
+                // Edit existing
+                selectType(entry.activityType || 'run');
+                document.getElementById('inputTitle').value = entry.title || "";
+                document.getElementById('inputDesc').value = entry.description || "";
+                document.getElementById('inputMeals').value = entry.meals || "";
+                document.getElementById('saveBtn').innerText = "UPDATE ACTIVITY";
             } else {
-                btn.innerText = "MARCAR COMPLETADO";
-                btn.className = "action-btn btn-complete";
+                // New Log - Pre-fill with suggestion but allow edit
+                // Map suggestion type to allowed types
+                let suggType = 'run';
+                if (suggestion.type === 'rest') suggType = 'rest';
+                if (suggestion.type === 'gym') suggType = 'gym';
+                if (suggestion.type === 'cerro') suggType = 'hike';
+
+                selectType(suggType); // Default to suggested type
+                document.getElementById('inputTitle').value = suggestion.title; // Pre-fill title
+                document.getElementById('inputDesc').value = ""; // Empty description for user to fill
+                document.getElementById('inputMeals').value = "";
+                document.getElementById('saveBtn').innerText = "SAVE ACTIVITY";
             }
+
+            // Coach Text
+            document.getElementById('coachText').innerText = `${suggestion.title}: ${suggestion.desc}`;
         }
 
-        function toggleComplete() {
-            const note = document.getElementById('journalInput').value;
-            if (trackingData[selectedDateId] && trackingData[selectedDateId].completed) {
-                delete trackingData[selectedDateId];
-            } else {
-                trackingData[selectedDateId] = { completed: true, note: note };
-            }
-            localStorage.setItem('patagoniaFinal_v6', JSON.stringify(trackingData));
+        function saveActivity() {
+            vibrate([20, 50]);
+
+            const title = document.getElementById('inputTitle').value || "Likely Workout";
+            const desc = document.getElementById('inputDesc').value;
+            const meals = document.getElementById('inputMeals').value;
+
+            trackingData[selectedDateId] = {
+                completed: true,
+                activityType: selectedType,
+                title: title,
+                description: desc,
+                meals: meals
+            };
+
+            localStorage.setItem('patagoniaFinal_v8', JSON.stringify(trackingData));
             closeModal();
-            renderCalendar();
+
+            // Refresh
+            if (document.getElementById('view-feed').classList.contains('active')) renderFeed();
+            else renderCalendar();
             updateStats();
         }
 
@@ -574,7 +1166,7 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(trackingData));
             const anchor = document.createElement('a');
             anchor.setAttribute("href", dataStr);
-            anchor.setAttribute("download", "patagonia_backup.json");
+            anchor.setAttribute("download", "strava_backup_v2.json");
             document.body.appendChild(anchor);
             anchor.click();
             anchor.remove();
@@ -584,32 +1176,36 @@
             const file = input.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 try {
                     trackingData = JSON.parse(e.target.result);
-                    localStorage.setItem('patagoniaFinal_v6', JSON.stringify(trackingData));
-                    alert("Datos cargados.");
+                    localStorage.setItem('patagoniaFinal_v8', JSON.stringify(trackingData));
+                    alert("Import successful");
                     closeSettings();
-                    renderCalendar();
+                    renderFeed();
                     updateStats();
-                } catch(err) { alert("Error en archivo."); }
+                } catch (err) { alert("Error importing file"); }
             };
             reader.readAsText(file);
         }
 
         function updateStats() {
             const today = new Date();
-            today.setHours(0,0,0,0);
             const trip = new Date(tripDate);
-            trip.setHours(0,0,0,0);
-            
-            const oneDay = 24 * 60 * 60 * 1000;
-            const diffDays = Math.round((trip - today) / oneDay);
-            
-            document.getElementById('daysLeft').innerText = diffDays > 0 ? diffDays : 0;
+            trip.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
+            const diffDays = Math.max(0, Math.round((trip - today) / (1000 * 3600 * 24)));
+
+            document.getElementById('daysLeft').innerText = diffDays;
             document.getElementById('completedCount').innerText = Object.keys(trackingData).length;
-            document.getElementById('currentPhaseLabel').innerText = getPhase(today).name;
         }
+
+        // Init
+        (function () {
+            renderFeed();
+            updateStats();
+        })();
     </script>
 </body>
+
 </html>
