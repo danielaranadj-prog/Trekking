@@ -944,6 +944,8 @@
                 <div class="header-actions">
                     <button class="header-icon-btn" onclick="openShareModal()" title="Reporte Táctico">📤</button>
                     <button class="header-icon-btn" onclick="openAchievementsModal()" title="Logros">🏆</button>
+                    <button class="header-icon-btn" onclick="logout()" title="Cerrar Sesión"
+                        style="color:#ff5252;">🚪</button>
                     <button class="settings-btn" onclick="openSettings()">
                         <svg viewBox="0 0 24 24">
                             <path
@@ -1300,6 +1302,7 @@
             let totalElev = 0;
 
             activities.forEach(a => {
+                if (!a) return;
                 if (a.activityType === 'hiking' || a.activityType === 'cerro' || a.activityType === 'hike') hikeCount++;
                 if (a.activityType === 'gym' || a.activityType === 'hit') gymCount++;
                 if (a.distance) totalDist += parseFloat(a.distance);
@@ -2091,8 +2094,12 @@
             }
 
             localStorage.setItem('patagoniaFinal_v6', JSON.stringify(trackingData));
-            checkAchievements(); // CHECK UNLOCKS
-            saveToFirestore(); // Sync to Cloud
+
+            try {
+                checkAchievements();
+            } catch (e) { console.error("Error in gamification logic:", e); }
+
+            saveToFirestore();
             closeModal();
             renderCalendar();
             updateStats();
@@ -2259,7 +2266,18 @@
             }).join('');
         }
 
+        async function logout() {
+            if (confirm("¿Cerrar sesión?")) {
+                try {
+                    await signOut(auth);
+                    // onAuthStateChanged will handle UI (show overlay)
+                    window.location.reload(); // Hard reload to clear memory/state
+                } catch (e) { console.error("Logout error", e); }
+            }
+        }
+
         // EXPORT NEW GLOBALS
+        window.logout = logout;
         window.openShareModal = openShareModal;
         window.closeShareModal = closeShareModal;
         window.copyShareReport = copyShareReport;
