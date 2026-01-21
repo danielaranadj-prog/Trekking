@@ -1,0 +1,154 @@
+---
+---
+<div id="nav-menu-container">
+    <!-- HAMBURGER BUTTON -->
+    <button id="hamburgerBtn" class="hamburger-btn">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- DRAWER OVERLAY -->
+    <div id="drawerOverlay" class="drawer-overlay hidden"></div>
+
+    <!-- DRAWER SIDEBAR -->
+    <aside id="drawerSidebar" class="drawer-sidebar closed">
+        <div class="drawer-header">
+            <span class="drawer-title">MENÚ</span>
+            <button id="closeDrawerBtn" class="close-drawer">&times;</button>
+        </div>
+        
+        <nav class="drawer-nav">
+            <button class="nav-item active" data-target="home">
+                <span class="nav-icon">🏠</span>
+                INICIO
+            </button>
+            <button class="nav-item" data-target="stats">
+                <span class="nav-icon">📊</span>
+                ESTADÍSTICAS
+            </button>
+            <!-- Future: Profile -->
+        </nav>
+
+        <div class="drawer-footer">
+            <button id="drawerLogout" class="logout-link">Cerrar Sesión</button>
+        </div>
+    </aside>
+</div>
+
+<script>
+    import { isMenuOpen, currentView } from '../stores/uiStore';
+    import { logoutUser } from '../stores/trainingStore';
+
+    const btn = document.getElementById('hamburgerBtn');
+    const closeBtn = document.getElementById('closeDrawerBtn');
+    const overlay = document.getElementById('drawerOverlay');
+    const sidebar = document.getElementById('drawerSidebar');
+    const navItems = document.querySelectorAll('.nav-item');
+    const logoutBtn = document.getElementById('drawerLogout');
+
+    // OPEN/CLOSE LOGIC
+    function toggleMenu(open) {
+        isMenuOpen.set(open);
+    }
+
+    btn.onclick = () => toggleMenu(true);
+    closeBtn.onclick = () => toggleMenu(false);
+    overlay.onclick = () => toggleMenu(false);
+
+    // STORE SUBSCRIPTION
+    isMenuOpen.subscribe(isOpen => {
+        if(isOpen) {
+            sidebar.classList.remove('closed');
+            overlay.classList.remove('hidden');
+        } else {
+            sidebar.classList.add('closed');
+            setTimeout(() => overlay.classList.add('hidden'), 300); // Wait for anim
+        }
+    });
+
+    // NAV ITMES
+    navItems.forEach(item => {
+        item.onclick = () => {
+            const target = item.getAttribute('data-target');
+            currentView.set(target);
+            toggleMenu(false);
+            
+            // Update Active State
+            navItems.forEach(n => n.classList.remove('active'));
+            item.classList.add('active');
+        };
+    });
+
+    // LOGOUT
+    if(logoutBtn) {
+        logoutBtn.onclick = () => {
+            if(confirm("¿Cerrar Sesión?")) {
+                logoutUser();
+                toggleMenu(false);
+            }
+        };
+    }
+</script>
+
+<style>
+    /* HAMBURGER */
+    .hamburger-btn {
+        background: none; border: none; color: var(--text-main);
+        cursor: pointer; padding: 5px;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .hamburger-btn:hover { color: var(--primary); }
+
+    /* OVERLAY */
+    .drawer-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6); z-index: 100;
+        opacity: 1; transition: opacity 0.3s;
+    }
+    .drawer-overlay.hidden { opacity: 0; pointer-events: none; }
+
+    /* SIDEBAR */
+    .drawer-sidebar {
+        position: fixed; top: 0; left: 0; z-index: 101;
+        width: 280px; height: 100%;
+        background: var(--bg-card);
+        box-shadow: 2px 0 20px rgba(0,0,0,0.5);
+        display: flex; flex-direction: column;
+        transition: transform 0.3s ease-in-out;
+    }
+    .drawer-sidebar.closed { transform: translateX(-100%); }
+
+    /* CONTENT */
+    .drawer-header {
+        padding: 20px; border-bottom: 1px solid var(--border);
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .drawer-title { font-family: 'Russo One'; font-size: 1.2rem; color: var(--primary); }
+    .close-drawer { background:none; border:none; font-size: 2rem; color: var(--text-muted); cursor: pointer; }
+
+    .drawer-nav { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+    
+    .nav-item {
+        background: transparent; border: none; color: var(--text-muted);
+        text-align: left; font-size: 1.1rem; padding: 12px;
+        border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 15px;
+        font-family: 'Inter', sans-serif; font-weight: 600;
+        transition: 0.2s;
+    }
+    .nav-item:hover, .nav-item.active {
+        background: var(--bg-main); color: var(--primary);
+    }
+    .nav-icon { font-size: 1.2rem; }
+
+    .drawer-footer { padding: 20px; border-top: 1px solid var(--border); }
+    .logout-link {
+        background: none; border: none; color: #ef4444; font-weight: 700;
+        font-size: 1rem; cursor: pointer; width: 100%; text-align: left;
+    }
+    
+    /* Responsive */
+    @media (max-width: 400px) {
+        .drawer-sidebar { width: 85%; }
+    }
+</style>

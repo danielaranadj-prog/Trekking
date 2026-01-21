@@ -4,6 +4,8 @@ import AuthGuard from '../components/AuthGuard.astro';
 import StatsDashboard from '../components/StatsDashboard.astro';
 import Calendar from '../components/Calendar.astro';
 import ActivityModal from '../components/ActivityModal.astro';
+import NavMenu from '../components/NavMenu.astro';
+import StatisticsView from '../components/StatisticsView.astro'; // Will create next
 ---
 
 <Layout title="Patagonia Tracker">
@@ -11,24 +13,38 @@ import ActivityModal from '../components/ActivityModal.astro';
         <div class="app-container">
             <!-- HEADER -->
             <header class="app-header">
+                <!-- NAV MENU (Left) -->
+                <NavMenu />
+
+                <!-- CENTER LOGO -->
                 <div class="logo-area">
-                    <span class="logo-icon">🏔️</span>
                     <div class="brand-title">
                         <span class="brand-main">PATAGONIA</span>
                         <span class="brand-orange">TRACKER</span>
                     </div>
                 </div>
                 
-                <div class="header-actions">
-                     <button class="text-btn" id="logoutBtn">SALIR</button>
-                </div>
+                <!-- Spacer for balance or tiny profile icon? -->
+                <div style="width: 28px;"></div> 
             </header>
     
-            <StatsDashboard />
-    
-            <main>
-                <Calendar />
-            </main>
+            <!-- VIEWS CONTAINER -->
+            <div id="views-wrapper">
+                
+                <!-- VIEW: HOME -->
+                <div id="view-home" class="view-section">
+                    <StatsDashboard />
+                    <main>
+                        <Calendar />
+                    </main>
+                </div>
+
+                <!-- VIEW: STATS -->
+                <div id="view-stats" class="view-section hidden">
+                    <StatisticsView />
+                </div>
+
+            </div>
             
             <ActivityModal />
         </div>
@@ -36,9 +52,21 @@ import ActivityModal from '../components/ActivityModal.astro';
 </Layout>
 
 <script>
-    import { logoutUser } from '../stores/trainingStore';
-    const btn = document.getElementById('logoutBtn');
-    if(btn) btn.onclick = () => { if(confirm("¿Salir?")) logoutUser(); };
+    import { currentView } from '../stores/uiStore';
+
+    const vHome = document.getElementById('view-home');
+    const vStats = document.getElementById('view-stats');
+
+    currentView.subscribe(view => {
+        // Simple Toggle
+        if(view === 'home') {
+            vHome.classList.remove('hidden');
+            vStats.classList.add('hidden');
+        } else if(view === 'stats') {
+            vHome.classList.add('hidden');
+            vStats.classList.remove('hidden');
+        }
+    });
 </script>
 
 <style>
@@ -53,15 +81,14 @@ import ActivityModal from '../components/ActivityModal.astro';
     .app-header {
         display: flex; justify-content: space-between; align-items: center;
         padding: 15px 20px;
-        background: var(--bg-main); /* Match main bg */
+        background: var(--bg-main);
         position: sticky; top: 0; z-index: 50;
-        border-bottom: 3px solid var(--bg-card); /* Subtle separate */
+        border-bottom: 3px solid var(--bg-card);
     }
 
-    .logo-area { display: flex; align-items: center; gap: 8px; }
-    .logo-icon { font-size: 1.5rem; color: var(--primary); }
+    .logo-area { display: flex; align-items: center; gap: 8px; text-align: center; }
     
-    .brand-title { display: flex; flex-direction: column; line-height: 0.9; }
+    .brand-title { display: flex; flex-direction: column; line-height: 0.9; align-items: center; }
     .brand-main {
         font-family: var(--font-head); color: var(--text-main); font-size: 1.1rem; letter-spacing: 0.5px;
     }
@@ -69,22 +96,8 @@ import ActivityModal from '../components/ActivityModal.astro';
         font-family: var(--font-head); color: var(--primary); font-size: 1.1rem; letter-spacing: 0.5px;
     }
 
-    .header-actions { display: flex; gap: 10px; }
-    
-    .text-btn {
-        background: transparent;
-        border: 1px solid var(--border);
-        color: var(--text-muted);
-        padding: 5px 12px;
-        border-radius: 4px;
-        font-family: var(--font-head);
-        font-size: 0.75rem;
-        letter-spacing: 1px;
-        transition: 0.2s;
-        cursor: pointer;
+    .view-section {
+        animation: fadeIn 0.3s ease;
     }
-    .text-btn:hover {
-        border-color: var(--primary);
-        color: var(--primary);
-    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 </style>
