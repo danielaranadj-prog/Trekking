@@ -11,6 +11,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Russo+One&display=swap"
         rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23FF5722%22><path d=%22M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z%22/></svg>">
 
@@ -854,6 +855,9 @@
                     <button class="phase-btn" onclick="setPhaseFilter(1, this)">FASE 1</button>
                     <button class="phase-btn" onclick="setPhaseFilter(2, this)">FASE 2</button>
                     <button class="phase-btn" onclick="setPhaseFilter(3, this)">FASE 3</button>
+                    <button class="phase-btn"
+                        style="color:var(--primary); font-weight:800; border:1px solid var(--primary);"
+                        onclick="toggleStats()">GRÁFICAS</button>
                 </div>
 
                 <div class="filter-dropdown-container">
@@ -904,6 +908,51 @@
 
         <div class="scroll-content">
             <div id="main-container"></div>
+
+            <!-- STATS CONTAINER (Hidden by default) -->
+            <div id="stats-container" style="display:none; padding-bottom:100px;">
+                <h2 class="month-header" style="border-left:none; text-align:center; margin-bottom:20px;">CENTRO DE
+                    OPERACIONES</h2>
+
+                <!-- KPI CARDS -->
+                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:30px;">
+                    <div class="week-block" style="text-align:center; padding:15px 5px;">
+                        <div style="font-size:1.5rem; font-weight:800; color:var(--primary);" id="statTotalHours">0
+                        </div>
+                        <div style="font-size:0.6rem; color:#888;">HORAS TOTALES</div>
+                    </div>
+                    <div class="week-block" style="text-align:center; padding:15px 5px;">
+                        <div style="font-size:1.5rem; font-weight:800; color:#76FF03;" id="statTotalCals">0</div>
+                        <div style="font-size:0.6rem; color:#888;">KCAL QUEMADAS</div>
+                    </div>
+                    <div class="week-block" style="text-align:center; padding:15px 5px;">
+                        <div style="font-size:1.5rem; font-weight:800; color:#FFC107;" id="statTotalActivities">0</div>
+                        <div style="font-size:0.6rem; color:#888;">SESIONES</div>
+                    </div>
+                </div>
+
+                <!-- CHARTS -->
+                <div class="week-block">
+                    <div class="week-header" style="border:none;">
+                        <div class="week-title">DISTRIBUCIÓN DE ACTIVIDAD</div>
+                    </div>
+                    <div style="height:250px; position:relative;">
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="week-block">
+                    <div class="week-header" style="border:none;">
+                        <div class="week-title">VOLUMEN SEMANAL (MINUTOS)</div>
+                    </div>
+                    <div style="height:250px; position:relative;">
+                        <canvas id="volumeChart"></canvas>
+                    </div>
+                </div>
+
+                <button class="action-btn" onclick="toggleStats()" style="background:#333; margin-top:20px;">VOLVER AL
+                    CALENDARIO</button>
+            </div>
         </div>
     </div>
 
@@ -966,6 +1015,22 @@
                 </div>
 
                 <div class="section-label">DETALLES Y NOTAS</div>
+
+                <!-- DATA FIELDS -->
+                <div class="data-grid" id="dataFields"
+                    style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                    <div>
+                        <label style="color:#777; font-size:0.7rem; font-weight:bold;">DURACIÓN (MIN)</label>
+                        <input type="number" id="durationInput" class="journal-input" placeholder="0"
+                            style="margin-top:5px; text-align:center;">
+                    </div>
+                    <div>
+                        <label style="color:#777; font-size:0.7rem; font-weight:bold;">CALORÍAS (KCAL)</label>
+                        <input type="number" id="caloriesInput" class="journal-input" placeholder="0"
+                            style="margin-top:5px; text-align:center;">
+                    </div>
+                </div>
+
                 <textarea id="journalInput" class="journal-input"
                     placeholder="¿Cómo te sentiste? ¿Distancia/Tiempo?"></textarea>
 
@@ -1001,9 +1066,9 @@
     </div>
 
     <script>
-        // Adjust START DATE to a Monday for clean weeks (Jan 5 is Mon, Jan 6 was Tue)
-        // User wants focus on Jan 19 week. 
-        const startDate = new Date(2026, 0, 5); // Monday Jan 5, 2026
+        // Adjust START DATE to reset counter.
+        // User wants Week 1 to be Jan 19-25.
+        const startDate = new Date(2026, 0, 19); // Monday Jan 19, 2026
         const tripDate = new Date(2026, 10, 1);
 
         let trackingData = JSON.parse(localStorage.getItem('patagoniaFinal_v6')) || {};
@@ -1037,7 +1102,130 @@
         (function () {
             renderCalendar();
             updateStats();
+            // Initialize charts logic (lazy load or init here)
         })();
+
+        let showingStats = false;
+        let chartInstances = {};
+
+        function toggleStats() {
+            showingStats = !showingStats;
+            const main = document.getElementById('main-container');
+            const stats = document.getElementById('stats-container');
+            const filterRow = document.querySelector('.controls-row');
+
+            if (showingStats) {
+                main.style.display = 'none';
+                stats.style.display = 'block';
+                // Hide filters while in stats
+                if (filterRow) filterRow.style.display = 'none';
+                renderCharts();
+            } else {
+                main.style.display = 'block';
+                stats.style.display = 'none';
+                if (filterRow) filterRow.style.display = 'flex';
+            }
+        }
+
+        function renderCharts() {
+            // 1. Calculate Data
+            let totalMins = 0;
+            let totalCals = 0;
+            let typeCounts = { 'cardio': 0, 'gym': 0, 'cerro': 0, 'swim': 0, 'rest': 0 };
+
+            // Weekly Data for Volume Chart (group by week start)
+            // Simplified: just show last 8 weeks or all? Let's show all weeks that have data.
+            let weeklyVolume = {};
+
+            Object.values(trackingData).forEach(entry => {
+                if (entry.completed) {
+                    const dur = entry.duration || 0;
+                    totalMins += dur;
+                    totalCals += (entry.calories || 0);
+
+                    let type = entry.activityType || 'cardio';
+                    if (typeCounts[type] !== undefined) typeCounts[type]++;
+                    else typeCounts['cardio']++; // fallback
+                }
+            });
+
+            // Update KPI Cards
+            document.getElementById('statTotalHours').innerText = (totalMins / 60).toFixed(1);
+            document.getElementById('statTotalCals').innerText = totalCals.toLocaleString();
+            document.getElementById('statTotalActivities').innerText = Object.values(trackingData).filter(e => e.completed).length;
+
+            // Destroy old charts if exist
+            if (chartInstances.type) chartInstances.type.destroy();
+            if (chartInstances.volume) chartInstances.volume.destroy();
+
+            // Doughnut Chart
+            const ctxType = document.getElementById('typeChart').getContext('2d');
+            chartInstances.type = new Chart(ctxType, {
+                type: 'doughnut',
+                data: {
+                    labels: ['RUN', 'GYM', 'HIKE', 'OTRO'],
+                    datasets: [{
+                        data: [typeCounts.cardio, typeCounts.gym, typeCounts.cerro, typeCounts.swim],
+                        backgroundColor: ['#FF5722', '#76FF03', '#FFC107', '#03A9F4'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: 'white', font: { size: 10 } } }
+                    }
+                }
+            });
+
+            // Weekly Bar Chart (Mocked logic for now -> Real implementation needs Date parsing)
+            // Let's iterate trackingData keys to group by week
+            const volumeData = {}; // "Week 1": 120, "Week 2": 200
+
+            Object.keys(trackingData).forEach(dateStr => {
+                const entry = trackingData[dateStr];
+                if (entry.completed && entry.duration) {
+                    const d = new Date(dateStr);
+                    // Simple week number calc
+                    const oneJan = new Date(d.getFullYear(), 0, 1);
+                    const numberOfDays = Math.floor((d - oneJan) / (24 * 60 * 60 * 1000));
+                    const weekNum = Math.ceil((d.getDay() + 1 + numberOfDays) / 7);
+
+                    const label = `Sem ${weekNum}`;
+                    if (!volumeData[label]) volumeData[label] = 0;
+                    volumeData[label] += entry.duration;
+                }
+            });
+
+            const weekLabels = Object.keys(volumeData).sort(); // simple string sort for now
+            const weekValues = weekLabels.map(l => volumeData[l]);
+
+            const ctxVol = document.getElementById('volumeChart').getContext('2d');
+            chartInstances.volume = new Chart(ctxVol, {
+                type: 'bar',
+                data: {
+                    labels: weekLabels.length > 0 ? weekLabels : ['Sin Datos'],
+                    datasets: [{
+                        label: 'Minutos',
+                        data: weekValues.length > 0 ? weekValues : [0],
+                        backgroundColor: '#FF5722',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#333' }, ticks: { color: '#888' } },
+                        x: { grid: { display: false }, ticks: { color: '#888' } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
 
         // --- DROPDOWN LOGIC ---
         function toggleFilterMenu() {
@@ -1210,6 +1398,16 @@
             currentSelectedType = type;
             document.querySelectorAll('#typeSelector .type-btn').forEach(b => b.classList.remove('active'));
             if (btn) btn.classList.add('active');
+
+            // Toggle Data Fields
+            const dataFields = document.getElementById('dataFields');
+            if (type === 'rest') {
+                dataFields.style.opacity = '0.3';
+                dataFields.style.pointerEvents = 'none';
+            } else {
+                dataFields.style.opacity = '1';
+                dataFields.style.pointerEvents = 'auto';
+            }
         }
 
         function openModal(dateStr, dayOfWeek, phase, routine) {
@@ -1241,6 +1439,9 @@
                 document.getElementById('mealsInput').value = entry.meals || "";
                 document.getElementById('customTitleInput').value = entry.title || "";
 
+                document.getElementById('durationInput').value = entry.duration || "";
+                document.getElementById('caloriesInput').value = entry.calories || "";
+
                 // Set Type
                 currentSelectedType = entry.activityType || routine.type;
 
@@ -1251,25 +1452,32 @@
                 document.getElementById('journalInput').value = "";
                 document.getElementById('mealsInput').value = "";
                 document.getElementById('customTitleInput').value = routine.title;
+                document.getElementById('durationInput').value = "";
+                document.getElementById('caloriesInput').value = "";
+
                 currentSelectedType = routine.type;
                 document.getElementById('completeBtn').innerText = "GUARDAR ACTIVIDAD";
             }
 
             // Update UI for Type Selector
             // Find button with onclick containing the type
-            // This is a bit hacky, cleaner to use data attributes, but we match the onClick string
             document.querySelectorAll('#typeSelector .type-btn').forEach(b => {
                 b.classList.remove('active');
                 if (b.getAttribute('onclick').includes(`'${currentSelectedType}'`)) {
                     b.classList.add('active');
                 }
             });
+
+            // Trigger visual toggle logic
+            selectType(currentSelectedType, document.querySelector(`.type-btn[onclick*="'${currentSelectedType}'"]`));
         }
 
         function saveActivity() {
             const note = document.getElementById('journalInput').value;
             const meals = document.getElementById('mealsInput').value;
             const title = document.getElementById('customTitleInput').value || "Actividad";
+            const duration = document.getElementById('durationInput').value;
+            const calories = document.getElementById('caloriesInput').value;
 
             // If empty note and empty meals and no change, maybe delete? 
             // prioritizing user intent: click save = save.
@@ -1279,7 +1487,9 @@
                 activityType: currentSelectedType,
                 title: title,
                 note: note,
-                meals: meals
+                meals: meals,
+                duration: duration ? parseInt(duration) : 0,
+                calories: calories ? parseInt(calories) : 0
             };
 
             localStorage.setItem('patagoniaFinal_v6', JSON.stringify(trackingData));
