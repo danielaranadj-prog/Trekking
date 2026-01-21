@@ -808,6 +808,27 @@
 </head>
 
 <body>
+    <!-- LOGIN OVERLAY -->
+    <div id="login-overlay"
+        style="display:flex; position:fixed; top:0; left:0; width:100%; height:100%; z-index:99999; background: #0f172a; align-items:center; justify-content:center; flex-direction:column;">
+        <div class="glass-card"
+            style="padding:40px; border-radius:24px; text-align:center; max-width:90%; width:350px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px);">
+            <div style="margin-bottom:20px; font-size:3rem;">🏔️</div>
+            <h1 style="color:white; font-family:var(--font-head); font-size:1.8rem; margin-bottom:5px;">PATAGONIA</h1>
+            <p style="color:#888; font-size:0.8rem; margin-bottom:30px; letter-spacing:1px;">TRACKER LOGIN</p>
+
+            <form style="display:flex; flex-direction:column; gap:15px;">
+                <input type="email" id="login-email" placeholder="Email"
+                    style="padding:15px; border-radius:12px; border:1px solid #333; background:rgba(0,0,0,0.3); color:white; outline:none;"
+                    value="danielaranadj@gmail.com">
+                <input type="password" id="login-pass" placeholder="Contraseña"
+                    style="padding:15px; border-radius:12px; border:1px solid #333; background:rgba(0,0,0,0.3); color:white; outline:none;">
+                <button type="submit" id="login-btn"
+                    style="padding:15px; border-radius:12px; background:linear-gradient(135deg, #FF5722, #FF9100); color:white; font-weight:800; border:none; cursor:pointer;">INGRESAR</button>
+            </form>
+            <p id="login-error" style="color:#ff5252; font-size:0.8rem; margin-top:15px; display:none;"></p>
+        </div>
+    </div>
 
     <div style="display: none;">
         <svg id="icon-cerro" viewBox="0 0 24 24">
@@ -1122,7 +1143,7 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
         // Adjust START DATE to reset counter.
         // User wants Week 1 to be Jan 19-25.
         const startDate = new Date(2026, 0, 19); // Monday Jan 19, 2026
@@ -1155,12 +1176,124 @@
             document.getElementById('app-container').classList.add('visible');
         }
 
-        // Auto-run
-        (function () {
-            renderCalendar();
-            updateStats();
-            // Initialize charts logic (lazy load or init here)
-        })();
+        // --- FIREBASE CONFIG & AUTH ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdsu65Voj8en9u_7eL5q0YRFuCC7fUYWA",
+            authDomain: "instantetrips-editor.firebaseapp.com",
+            projectId: "instantetrips-editor",
+            storageBucket: "instantetrips-editor.firebasestorage.app",
+            messagingSenderId: "281917140804",
+            appId: "1:281917140804:web:ed712e65c9c4b77dd3b111"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        let currentUser = null;
+
+        // --- LOGIN LOGIC ---
+        const loginOverlay = document.getElementById('login-overlay');
+        const appContainer = document.getElementById('app-container'); // Wrap main content in this if needed, or just toggle body.
+
+        // We need to wrap the existing body content in a div to hide/show it, OR handle it via overlay z-index.
+        // The admin used a full screen overlay. We'll do the same.
+
+        // Listen to Auth State
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('login-overlay').style.display = 'none';
+                console.log("Logged in:", user.email);
+
+                // LOAD DATA FROM FIRESTORE
+                await loadFromFirestore();
+
+                renderCalendar();
+                updateStats();
+            } else {
+                currentUser = null;
+                document.getElementById('login-overlay').style.display = 'flex';
+            }
+        });
+
+        // Login Form Handler
+        document.getElementById('login-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            const errorMsg = document.getElementById('login-error');
+
+            try {
+                btnLoading(true);
+                await signInWithEmailAndPassword(auth, email, pass);
+                // Auth Observer will handle success
+            } catch (err) {
+                btnLoading(false);
+                errorMsg.textContent = "Error: " + err.message;
+                errorMsg.style.display = 'block';
+            }
+        });
+
+        function btnLoading(isLoading) {
+            const btn = document.getElementById('login-btn');
+            if (isLoading) {
+                btn.innerHTML = 'Conectando...';
+                btn.disabled = true;
+            } else {
+                btn.innerHTML = 'INGRESAR';
+                btn.disabled = false;
+            }
+        }
+
+        // --- FIRESTORE SYNC ---
+        async function loadFromFirestore() {
+            if (!currentUser) return;
+            try {
+                const docRef = doc(db, "users", currentUser.uid, "trekking", "data");
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    console.log("Document data found in Cloud!");
+                    trackingData = docSnap.data().trackingData || {};
+                    // Merge/Update LocalStorage to keep them in sync?
+                    localStorage.setItem('patagoniaFinal_v6', JSON.stringify(trackingData));
+                } else {
+                    console.log("No cloud data. Keeping LocalStorage.");
+                    // Optional: Upload LocalStorage to Cloud now?
+                    saveToFirestore();
+                }
+            } catch (e) {
+                console.error("Error loading from cloud:", e);
+                alert("Error cargando datos de la nube. Se usará copia local.");
+            }
+        }
+
+        async function saveToFirestore() {
+            if (!currentUser) return;
+            // Debounce or immediate? Immediate for now via saveActivity.
+            try {
+                await setDoc(doc(db, "users", currentUser.uid, "trekking", "data"), {
+                    trackingData: trackingData,
+                    lastUpdate: new Date().toISOString()
+                });
+                console.log("Cloud Saved.");
+            } catch (e) {
+                console.error("Error saving to cloud:", e);
+            }
+        }
+
+        // EXPORT functions for saveActivity to call
+        window.saveToFirestore = saveToFirestore;
+
+        // Auto-run (Removed, handled by onAuthStateChanged)
+        // (function () {
+        //     renderCalendar();
+        //     updateStats();
+        // })();
 
         let showingStats = false;
         let chartInstances = {};
@@ -1758,6 +1891,7 @@
             }
 
             localStorage.setItem('patagoniaFinal_v6', JSON.stringify(trackingData));
+            saveToFirestore(); // Sync to Cloud
             closeModal();
             renderCalendar();
             updateStats();
@@ -1776,6 +1910,7 @@
                     }
 
                     localStorage.setItem('patagoniaFinal_v6', JSON.stringify(trackingData));
+                    saveToFirestore(); // Sync to Cloud
                 }
                 closeModal();
                 renderCalendar();
@@ -1813,6 +1948,7 @@
                 try {
                     trackingData = JSON.parse(e.target.result);
                     localStorage.setItem('patagoniaFinal_v6', JSON.stringify(trackingData));
+                    saveToFirestore(); // Sync to Cloud
                     alert("Datos cargados.");
                     closeSettings();
                     renderCalendar();
@@ -1835,6 +1971,23 @@
             document.getElementById('completedCount').innerText = Object.keys(trackingData).length;
             document.getElementById('currentPhaseLabel').innerText = getPhase(today).name;
         }
+        // EXPORT GLOBALS FOR MODULE
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.saveActivity = saveActivity;
+        window.deleteActivity = deleteActivity;
+        window.addActivityToDay = addActivityToDay;
+        window.openSettings = openSettings;
+        window.closeSettings = closeSettings;
+        window.exportData = exportData;
+        window.importData = importData;
+
+        window.toggleFilter = toggleFilter;
+        window.toggleFilterMenu = toggleFilterMenu;
+        window.toggleStats = toggleStats;
+        window.switchTab = switchTab;
+        window.renderCalendar = renderCalendar;
+        window.updateStats = updateStats;
     </script>
 </body>
 
