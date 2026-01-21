@@ -231,10 +231,81 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            /* Fases a la izq, Filtro a la der */
             gap: 10px;
             padding-top: 5px;
         }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header-icon-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: 0.2s;
+        }
+
+        .header-icon-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .achievement-card {
+            background: #222;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            opacity: 0.4;
+            filter: grayscale(100%);
+            transition: 0.3s;
+        }
+
+        .achievement-card.unlocked {
+            opacity: 1;
+            filter: grayscale(0%);
+            background: #2a2a2a;
+            box-shadow: 0 0 10px rgba(255, 87, 34, 0.2);
+            border: 1px solid var(--primary);
+        }
+
+        .achievement-icon {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .achievement-title {
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: white;
+            display: block;
+        }
+
+        .achievement-desc {
+            font-size: 0.6rem;
+            color: #888;
+            display: block;
+            line-height: 1.1;
+            margin-top: 3px;
+        }
+
+
 
         /* Fases (Scroll horizontal si es necesario) */
         .phases-bar {
@@ -870,12 +941,16 @@
                         <h1>PATAGONIA <span>TREKKING</span></h1>
                     </div>
                 </div>
-                <button class="settings-btn" onclick="openSettings()">
-                    <svg viewBox="0 0 24 24">
-                        <path
-                            d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z" />
-                    </svg>
-                </button>
+                <div class="header-actions">
+                    <button class="header-icon-btn" onclick="openShareModal()" title="Reporte Táctico">📤</button>
+                    <button class="header-icon-btn" onclick="openAchievementsModal()" title="Logros">🏆</button>
+                    <button class="settings-btn" onclick="openSettings()">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L4.04 9.43c-.11.21-.06.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.58 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.11-.22.06-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div class="dashboard-grid">
@@ -1143,6 +1218,35 @@
         </div>
     </div>
 
+    <!-- ACHIEVEMENTS MODAL -->
+    <div id="achievementsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="display:flex; align-items:center; gap:10px;">🏆 LOGROS</h2>
+                <button class="close-btn" onclick="closeAchievementsModal()">&times;</button>
+            </div>
+            <p style="color:#aaa; font-size:0.8rem; text-align:center;">Desbloquea medallas completando hitos.</p>
+            <div class="achievement-grid" id="achievementsGrid">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SHARE MODAL -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="display:flex; align-items:center; gap:10px;">📤 REPORTE TÁCTICO</h2>
+                <button class="close-btn" onclick="closeShareModal()">&times;</button>
+            </div>
+            <textarea id="shareText"
+                style="width:100%; height:200px; background:#111; color:#0f0; border:1px solid #333; padding:10px; font-family:monospace; font-size:0.8rem; border-radius:8px; resize:none;"
+                readonly></textarea>
+            <button class="action-btn" style="margin-top:15px; background:var(--primary); width:100%;"
+                onclick="copyShareReport()">COPIAR AL PORTAPAPELES</button>
+        </div>
+    </div>
+
     <script type="module">
         // Adjust START DATE to reset counter.
         // User wants Week 1 to be Jan 19-25.
@@ -1170,6 +1274,93 @@
             6: { title: "Día de Cerro", type: "hiking", icon: "icon-cerro", desc: "Salida a ruta.", note: "Conexión total." },
             0: { title: "Cerro / Relax", type: "hiking", icon: "icon-cerro", desc: "Opción B de montaña.", note: "Disfruta." }
         };
+
+        // --- GAMIFICATION SYSTEM ---
+        const ALL_ACHIEVEMENTS = [
+            { id: 'FIRST_STEP', title: 'Primer Paso', desc: 'Registra tu primera actividad.', icon: '🚀' },
+            { id: 'HIKER_I', title: 'Explorador', desc: 'Registra 5 actividades de Cerro/Hiking.', icon: '🥾' },
+            { id: 'GYM_RAT', title: 'Bestia de Gym', desc: '10 sesiones de fuerza/Gym.', icon: '🏋️' },
+            { id: 'STREAK_3', title: 'Constancia', desc: 'Racha de 3 días seguidos.', icon: '🔥' },
+            { id: 'STREAK_7', title: 'Imparable', desc: 'Racha de 7 días seguidos.', icon: '🔥🔥' },
+            { id: 'DIST_50K', title: 'Ultramaratón', desc: 'Acumula 50km totales.', icon: '🏃' },
+            { id: 'ELEV_1K', title: 'Escalador', desc: 'Acumula 1000m de desnivel.', icon: '🏔️' },
+            { id: 'COMMITMENT', title: 'Compromiso', desc: 'Completa 20 actividades en total.', icon: '🎖️' }
+        ];
+
+        let unlockedAchievements = JSON.parse(localStorage.getItem('patagonia_achievements')) || [];
+
+        function checkAchievements() {
+            const activities = Object.values(trackingData).flat(); // Normalize all to array
+            const totalCount = activities.length;
+
+            // Counters
+            let hikeCount = 0;
+            let gymCount = 0;
+            let totalDist = 0;
+            let totalElev = 0;
+
+            activities.forEach(a => {
+                if (a.activityType === 'hiking' || a.activityType === 'cerro' || a.activityType === 'hike') hikeCount++;
+                if (a.activityType === 'gym' || a.activityType === 'hit') gymCount++;
+                if (a.distance) totalDist += parseFloat(a.distance);
+                if (a.elevation) totalElev += parseInt(a.elevation);
+            });
+
+            // Calculate Streak (complex logic simplified: check last 7 days from today backwards)
+            // For now, simpler check: do we have entries for today, yesterday, etc?
+            // Let's postpone strict streak algo for a simple "Total Days" for now or implement later.
+
+            const newUnlocks = [];
+
+            // RULES
+            if (totalCount >= 1) unlock('FIRST_STEP', newUnlocks);
+            if (hikeCount >= 5) unlock('HIKER_I', newUnlocks);
+            if (gymCount >= 10) unlock('GYM_RAT', newUnlocks);
+            if (totalDist >= 50) unlock('DIST_50K', newUnlocks);
+            if (totalElev >= 1000) unlock('ELEV_1K', newUnlocks);
+            if (totalCount >= 20) unlock('COMMITMENT', newUnlocks);
+
+            // Save if new
+            if (newUnlocks.length > 0) {
+                localStorage.setItem('patagonia_achievements', JSON.stringify(unlockedAchievements));
+                saveAchievementsToCloud();
+                showAchievementToast(newUnlocks);
+            }
+        }
+
+        function unlock(id, newArr) {
+            if (!unlockedAchievements.includes(id)) {
+                unlockedAchievements.push(id);
+                newArr.push(ALL_ACHIEVEMENTS.find(a => a.id === id));
+            }
+        }
+
+        async function saveAchievementsToCloud() {
+            if (!currentUser) return;
+            try {
+                await setDoc(doc(db, "users", currentUser.uid, "trekking", "achievements"), {
+                    list: unlockedAchievements,
+                    lastUpdate: new Date().toISOString()
+                });
+            } catch (e) { console.error("Error saving achievements", e); }
+        }
+
+        async function loadAchievementsFromCloud() {
+            if (!currentUser) return;
+            try {
+                const snap = await getDoc(doc(db, "users", currentUser.uid, "trekking", "achievements"));
+                if (snap.exists()) {
+                    unlockedAchievements = snap.data().list || [];
+                    localStorage.setItem('patagonia_achievements', JSON.stringify(unlockedAchievements));
+                }
+            } catch (e) { console.error("Error loading achievements", e); }
+        }
+
+        function showAchievementToast(achievements) {
+            // Simple Alert or Toast
+            const names = achievements.map(a => a.icon + " " + a.title).join(", ");
+            alert(`🏆 ¡LOGRO DESBLOQUEADO!\n\n${names}`);
+        }
 
         function enterApp() {
             document.getElementById('landing-page').classList.add('hidden');
@@ -1209,8 +1400,17 @@
                 document.getElementById('login-overlay').style.display = 'none';
                 console.log("Logged in:", user.email);
 
+                // HIDE OLD LANDING PAGE
+                const landing = document.getElementById('landing-page');
+                if (landing) {
+                    landing.classList.add('hidden');
+                    landing.style.display = 'none';
+                }
+                document.getElementById('app-container').classList.add('visible');
+
                 // LOAD DATA FROM FIRESTORE
                 await loadFromFirestore();
+                await loadAchievementsFromCloud();
 
                 renderCalendar();
                 updateStats();
@@ -1267,8 +1467,8 @@
                     saveToFirestore();
                 }
             } catch (e) {
-                console.error("Error loading from cloud:", e);
-                alert("Error cargando datos de la nube. Se usará copia local.");
+                console.warn("Error loading from cloud (using local):", e);
+                // suppressed alert for seamless ux
             }
         }
 
@@ -1891,6 +2091,7 @@
             }
 
             localStorage.setItem('patagoniaFinal_v6', JSON.stringify(trackingData));
+            checkAchievements(); // CHECK UNLOCKS
             saveToFirestore(); // Sync to Cloud
             closeModal();
             renderCalendar();
@@ -1948,6 +2149,7 @@
                 try {
                     trackingData = JSON.parse(e.target.result);
                     localStorage.setItem('patagoniaFinal_v6', JSON.stringify(trackingData));
+                    checkAchievements(); // CHECK UNLOCKS
                     saveToFirestore(); // Sync to Cloud
                     alert("Datos cargados.");
                     closeSettings();
@@ -1988,6 +2190,81 @@
         window.switchTab = switchTab;
         window.renderCalendar = renderCalendar;
         window.updateStats = updateStats;
+        // SHARE & ACHIEVEMENTS LOGIC
+        function openShareModal() {
+            document.getElementById('shareModal').style.display = 'flex';
+            const report = generateShareReport();
+            document.getElementById('shareText').value = report;
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModal').style.display = 'none';
+        }
+
+        function generateShareReport() {
+            const today = new Date();
+            const start = new Date(startDate);
+            const diffTime = Math.abs(today - start);
+            const dayCount = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            // Stats
+            const activities = Object.values(trackingData).flat();
+            const totalCount = activities.length;
+
+            // Streak (Simple calc)
+            // let streak = 0; // TODO impl streak
+
+            const phName = getPhase(today).name;
+
+            let report = `/// REPORTE TÁCTICO P26 ///\n`;
+            report += `📅 DÍA: ${dayCount}/286\n`;
+            report += `📍 FASE: ${phName}\n`;
+            report += `✅ COMPLETADO: ${totalCount} Entrenamientos\n`;
+            report += `🏔️ PROX. HITO: Ver Plan\n`;
+            report += `"El dolor es temporal."\n\n`;
+            report += `[PatagoniaTracker App]`;
+
+            return report;
+        }
+
+        function copyShareReport() {
+            const copyText = document.getElementById("shareText");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(copyText.value);
+            alert("Reporte copiado al portapapeles. ¡A compartir!");
+        }
+
+        function openAchievementsModal() {
+            document.getElementById('achievementsModal').style.display = 'flex';
+            renderAchievementsGrid();
+        }
+
+        function closeAchievementsModal() {
+            document.getElementById('achievementsModal').style.display = 'none';
+        }
+
+        function renderAchievementsGrid() {
+            const grid = document.getElementById('achievementsGrid');
+            grid.innerHTML = ALL_ACHIEVEMENTS.map(a => {
+                const isUnlocked = unlockedAchievements.includes(a.id);
+                const statusClass = isUnlocked ? 'unlocked' : '';
+                return `
+                    <div class="achievement-card ${statusClass}">
+                        <span class="achievement-icon">${a.icon}</span>
+                        <span class="achievement-title">${a.title}</span>
+                        <span class="achievement-desc">${a.desc}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // EXPORT NEW GLOBALS
+        window.openShareModal = openShareModal;
+        window.closeShareModal = closeShareModal;
+        window.copyShareReport = copyShareReport;
+        window.openAchievementsModal = openAchievementsModal;
+        window.closeAchievementsModal = closeAchievementsModal;
     </script>
 </body>
 
