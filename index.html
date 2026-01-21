@@ -437,9 +437,17 @@
                 /* Mobile: Horizontal Scroll for days in the week */
                 display: flex;
                 overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                /* Smooth iOS scroll */
                 padding-bottom: 10px;
                 scrollbar-width: none;
                 gap: 10px;
+                scroll-snap-type: x mandatory;
+                /* Optional: Snap to cards */
+            }
+
+            .day-card {
+                scroll-snap-align: start;
             }
 
             .week-row::-webkit-scrollbar {
@@ -612,6 +620,22 @@
             border-radius: 6px;
             border-left: 3px solid var(--primary);
             margin-bottom: 20px;
+        }
+
+        .day-card.planned-only {
+            opacity: 0.6;
+            background-color: #fcfcfc;
+            border: 1px dashed #ddd;
+            /* Dotted border for plan */
+        }
+
+        .day-card.planned-only .activity-icon {
+            fill: #ccc;
+            /* Grey icon for plan */
+        }
+
+        .day-card.planned-only .activity-name {
+            color: #999;
         }
 
         .journal-input {
@@ -878,28 +902,39 @@
                                     d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
                             </svg> TODOS
                         </button>
-                        <button class="filter-option" onclick="setTypeFilter('cerro', this, 'CERRO')">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z" />
-                            </svg> CERRO
-                        </button>
-                        <button class="filter-option" onclick="setTypeFilter('gym', this, 'GYM')">
-                            <svg viewBox="0 0 24 24">
-                                <path
-                                    d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 5.57 2 7.71 3.43 9.14 2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 18.43 22 16.29z" />
-                            </svg> GYM
-                        </button>
-                        <button class="filter-option" onclick="setTypeFilter('cardio', this, 'CARDIO')">
+                        <button class="filter-option" onclick="setTypeFilter('walk', this, 'WALK')">
                             <svg viewBox="0 0 24 24">
                                 <path
                                     d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7" />
-                            </svg> CARDIO
+                            </svg> WALK
                         </button>
-                        <button class="filter-option" onclick="setTypeFilter('rest', this, 'RELAX')">
+                        <button class="filter-option" onclick="setTypeFilter('running', this, 'RUNNING')">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7" />
+                            </svg> RUNNING
+                        </button>
+                        <button class="filter-option" onclick="setTypeFilter('hiking', this, 'HIKING')">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z" />
+                            </svg> HIKING
+                        </button>
+                        <button class="filter-option" onclick="setTypeFilter('trekking', this, 'TREKKING')">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z" />
+                            </svg> TREKKING
+                        </button>
+                        <button class="filter-option" onclick="setTypeFilter('hit', this, 'HIT')">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 5.57 2 7.71 3.43 9.14 2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 18.43 22 16.29z" />
+                            </svg> HIT
+                        </button>
+                        <button class="filter-option" onclick="setTypeFilter('dayoff', this, 'DAYOFF')">
                             <svg viewBox="0 0 24 24">
                                 <path
                                     d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                            </svg> RELAX
+                            </svg> DAYOFF
                         </button>
                     </div>
                 </div>
@@ -964,83 +999,105 @@
             </div>
             <div style="margin-bottom: 20px;">
                 <!-- ACTIVITY TYPE -->
-                <div class="section-label">TIPO DE ACTIVIDAD</div>
-                <div class="type-selector" id="typeSelector">
-                    <button class="type-btn" onclick="selectType('cardio', this)">
+                <div class="section-label">TIPO DE ENTRENAMIENTO</div>
+                <div class="type-selector" id="typeSelector" style="grid-template-columns: repeat(3, 1fr);">
+                    <button class="type-btn" onclick="selectType('walk', this)">
                         <svg viewBox="0 0 24 24">
                             <path
                                 d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7" />
                         </svg>
-                        <span>RUN</span>
+                        <span>WALK</span>
                     </button>
-                    <button class="type-btn" onclick="selectType('gym', this)">
+                    <button class="type-btn" onclick="selectType('running', this)">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7" />
+                        </svg>
+                        <span>RUNNING</span>
+                    </button>
+                    <button class="type-btn" onclick="selectType('hiking', this)">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z" />
+                        </svg>
+                        <span>HIKING</span>
+                    </button>
+                    <button class="type-btn" onclick="selectType('trekking', this)">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z" />
+                        </svg>
+                        <span>TREKKING</span>
+                    </button>
+                    <button class="type-btn" onclick="selectType('hit', this)">
                         <svg viewBox="0 0 24 24">
                             <path
                                 d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 5.57 2 7.71 3.43 9.14 2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 18.43 22 16.29z" />
                         </svg>
-                        <span>GYM</span>
+                        <span>HIT</span>
                     </button>
-                    <button class="type-btn" onclick="selectType('cerro', this)">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z" />
-                        </svg>
-                        <span>HIKE</span>
-                    </button>
-                    <button class="type-btn" onclick="selectType('rest', this)">
+                    <button class="type-btn" onclick="selectType('dayoff', this)">
                         <svg viewBox="0 0 24 24">
                             <path
                                 d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                         </svg>
-                        <span>REST</span>
-                    </button>
-                    <button class="type-btn" onclick="selectType('swim', this)">
-                        <!-- Reuse Rest Icon or Generic for now, assuming swim/other -->
-                        <svg viewBox="0 0 24 24">
-                            <path
-                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-                        </svg>
-                        <span>OTRO</span>
+                        <span>DAYOFF</span>
                     </button>
                 </div>
 
-                <h3 id="modalTitle" style="color: white; margin-bottom: 5px; font-size:1.1rem;">ACTIVIDAD</h3>
-                <input type="text" id="customTitleInput" class="journal-input"
-                    style="min-height:40px; margin-bottom:10px; padding:8px;" placeholder="Título (Original: ...)">
-
-                <div class="coach-note" id="coachSection">
-                    <small style="color:var(--primary); font-weight:bold;">PLAN ORIGINAL:</small>
-                    <p id="modalDescription" style="color: #aaa; margin:5px 0 0 0; font-size: 0.85rem;">...</p>
-                    <p id="modalNote" style="margin:5px 0 0 0; color:#ddd; font-style:italic; font-size: 0.8rem;">...
-                    </p>
-                </div>
-
-                <div class="section-label">DETALLES Y NOTAS</div>
-
-                <!-- DATA FIELDS -->
-                <div class="data-grid" id="dataFields"
-                    style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
-                    <div>
-                        <label style="color:#777; font-size:0.7rem; font-weight:bold;">DURACIÓN (MIN)</label>
-                        <input type="number" id="durationInput" class="journal-input" placeholder="0"
-                            style="margin-top:5px; text-align:center;">
-                    </div>
-                    <div>
-                        <label style="color:#777; font-size:0.7rem; font-weight:bold;">CALORÍAS (KCAL)</label>
-                        <input type="number" id="caloriesInput" class="journal-input" placeholder="0"
-                            style="margin-top:5px; text-align:center;">
-                    </div>
-                </div>
-
-                <textarea id="journalInput" class="journal-input"
-                    placeholder="¿Cómo te sentiste? ¿Distancia/Tiempo?"></textarea>
-
-                <div class="section-label">NUTRICIÓN 🍎</div>
-                <textarea id="mealsInput" class="journal-input" placeholder="Desayuno, Comida, Cena..." rows="2"
-                    style="min-height:60px;"></textarea>
             </div>
 
-            <button id="completeBtn" class="action-btn btn-complete" onclick="saveActivity()">GUARDAR ACTIVIDAD</button>
+            <h3 id="modalTitle" style="color: white; margin-bottom: 5px; font-size:1.1rem;">ACTIVIDAD</h3>
+            <input type="text" id="customTitleInput" class="journal-input"
+                style="min-height:40px; margin-bottom:10px; padding:8px;" placeholder="Título (Original: ...)">
+
+            <div class="coach-note" id="coachSection">
+                <small style="color:var(--primary); font-weight:bold;">PLAN ORIGINAL:</small>
+                <p id="modalDescription" style="color: #aaa; margin:5px 0 0 0; font-size: 0.85rem;">...</p>
+                <p id="modalNote" style="margin:5px 0 0 0; color:#ddd; font-style:italic; font-size: 0.8rem;">...
+                </p>
+            </div>
+
+            <div class="section-label">DETALLES Y NOTAS</div>
+
+            <!-- DATA FIELDS -->
+            <div class="data-grid" id="dataFields"
+                style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                <div>
+                    <label style="color:#777; font-size:0.7rem; font-weight:bold;">DURACIÓN (MIN)</label>
+                    <input type="number" id="durationInput" class="journal-input" placeholder="0"
+                        style="margin-top:5px; text-align:center;">
+                </div>
+                <div>
+                    <label style="color:#777; font-size:0.7rem; font-weight:bold;">CALORÍAS (KCAL)</label>
+                    <input type="number" id="caloriesInput" class="journal-input" placeholder="0"
+                        style="margin-top:5px; text-align:center;">
+                </div>
+                <div id="distanceField">
+                    <label style="color:#777; font-size:0.7rem; font-weight:bold;">DISTANCIA (KM)</label>
+                    <input type="number" id="distanceInput" class="journal-input" placeholder="0.0" step="0.1"
+                        style="margin-top:5px; text-align:center;">
+                </div>
+                <div id="elevationField">
+                    <label style="color:#777; font-size:0.7rem; font-weight:bold;">ALTITUD (M)</label>
+                    <input type="number" id="elevationInput" class="journal-input" placeholder="0"
+                        style="margin-top:5px; text-align:center;">
+                </div>
+            </div>
+
+            <textarea id="journalInput" class="journal-input"
+                placeholder="¿Cómo te sentiste? ¿Distancia/Tiempo?"></textarea>
+
+            <div class="section-label">NUTRICIÓN 🍎</div>
+            <textarea id="mealsInput" class="journal-input" placeholder="Desayuno, Comida, Cena..." rows="2"
+                style="min-height:60px;"></textarea>
         </div>
+
+        <div style="display:flex; gap:10px;">
+            <button id="deleteBtn" class="action-btn" style="background-color: #D32F2F; display:none;"
+                onclick="deleteActivity()">ELIMINAR</button>
+            <button id="completeBtn" class="action-btn btn-complete" style="flex:1;" onclick="saveActivity()">GUARDAR
+                ACTIVIDAD</button>
+        </div>
+    </div>
     </div>
 
     <div id="settingsModal" class="modal">
@@ -1084,13 +1141,13 @@
         ];
 
         const routines = {
-            1: { title: "Relax / Yoga", type: "rest", icon: "icon-rest", desc: "Estiramiento o caminata suave.", note: "Recuperación activa." },
-            2: { title: "Cardio Z2", type: "cardio", icon: "icon-cardio", desc: "40 min trote suave.", note: "Base aeróbica." },
-            3: { title: "Gym Pierna", type: "gym", icon: "icon-gym", desc: "Sentadillas y Lunges.", note: "Piensa en el Fitz Roy." },
-            4: { title: "Intervalos", type: "cardio", icon: "icon-cardio", desc: "30 min cambios de ritmo.", note: "Ganando aire." },
-            5: { title: "Descanso Total", type: "rest", icon: "icon-rest", desc: "Dormir bien y comer.", note: "El músculo crece hoy." },
-            6: { title: "Día de Cerro", type: "cerro", icon: "icon-cerro", desc: "Salida a ruta.", note: "Conexión total." },
-            0: { title: "Cerro / Relax", type: "cerro", icon: "icon-cerro", desc: "Opción B de montaña.", note: "Disfruta." }
+            1: { title: "Relax / Yoga", type: "dayoff", icon: "icon-rest", desc: "Estiramiento o caminata suave.", note: "Recuperación activa." },
+            2: { title: "Cardio Z2", type: "running", icon: "icon-cardio", desc: "40 min trote suave.", note: "Base aeróbica." },
+            3: { title: "Gym Pierna", type: "hit", icon: "icon-gym", desc: "Sentadillas y Lunges.", note: "Piensa en el Fitz Roy." },
+            4: { title: "Intervalos", type: "running", icon: "icon-cardio", desc: "30 min cambios de ritmo.", note: "Ganando aire." },
+            5: { title: "Descanso Total", type: "dayoff", icon: "icon-rest", desc: "Dormir bien y comer.", note: "El músculo crece hoy." },
+            6: { title: "Día de Cerro", type: "hiking", icon: "icon-cerro", desc: "Salida a ruta.", note: "Conexión total." },
+            0: { title: "Cerro / Relax", type: "hiking", icon: "icon-cerro", desc: "Opción B de montaña.", note: "Disfruta." }
         };
 
         function enterApp() {
@@ -1137,66 +1194,48 @@
             // Simplified: just show last 8 weeks or all? Let's show all weeks that have data.
             let weeklyVolume = {};
 
-            Object.values(trackingData).forEach(entry => {
-                if (entry.completed) {
-                    const dur = entry.duration || 0;
-                    totalMins += dur;
-                    totalCals += (entry.calories || 0);
+            Object.keys(trackingData).forEach(dateStr => {
+                let entries = trackingData[dateStr];
+                // Flatten to array
+                if (!Array.isArray(entries)) entries = [entries];
 
-                    let type = entry.activityType || 'cardio';
-                    if (typeCounts[type] !== undefined) typeCounts[type]++;
-                    else typeCounts['cardio']++; // fallback
-                }
+                entries.forEach(entry => {
+                    if (entry.completed) {
+                        const dur = entry.duration || 0;
+                        totalMins += dur;
+                        totalCals += (entry.calories || 0);
+
+                        let type = entry.activityType || 'cardio';
+                        if (typeCounts[type] !== undefined) typeCounts[type]++;
+                        else typeCounts['cardio']++; // fallback
+
+                        // Volume per week
+                        // Need date from file KEY, not specific entry param
+                        const d = new Date(dateStr);
+                        const oneJan = new Date(d.getFullYear(), 0, 1);
+                        const numberOfDays = Math.floor((d - oneJan) / (24 * 60 * 60 * 1000));
+                        const weekNum = Math.ceil((d.getDay() + 1 + numberOfDays) / 7);
+
+                        const label = `Sem ${weekNum}`;
+                        if (!volumeData[label]) volumeData[label] = 0;
+                        volumeData[label] += dur;
+                    }
+                });
             });
 
             // Update KPI Cards
             document.getElementById('statTotalHours').innerText = (totalMins / 60).toFixed(1);
             document.getElementById('statTotalCals').innerText = totalCals.toLocaleString();
-            document.getElementById('statTotalActivities').innerText = Object.values(trackingData).filter(e => e.completed).length;
 
-            // Destroy old charts if exist
-            if (chartInstances.type) chartInstances.type.destroy();
-            if (chartInstances.volume) chartInstances.volume.destroy();
-
-            // Doughnut Chart
-            const ctxType = document.getElementById('typeChart').getContext('2d');
-            chartInstances.type = new Chart(ctxType, {
-                type: 'doughnut',
-                data: {
-                    labels: ['RUN', 'GYM', 'HIKE', 'OTRO'],
-                    datasets: [{
-                        data: [typeCounts.cardio, typeCounts.gym, typeCounts.cerro, typeCounts.swim],
-                        backgroundColor: ['#FF5722', '#76FF03', '#FFC107', '#03A9F4'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'right', labels: { color: 'white', font: { size: 10 } } }
-                    }
-                }
+            // Stats Activities Count (Unique Days or Total Sessions?)
+            // Usually Stats = Total Sessions (Work Done). Compliance = Days.
+            // Let's count Total Sessions here.
+            let totalSessions = 0;
+            Object.values(trackingData).forEach(v => {
+                if (Array.isArray(v)) totalSessions += v.length;
+                else if (v && v.completed) totalSessions++;
             });
-
-            // Weekly Bar Chart (Mocked logic for now -> Real implementation needs Date parsing)
-            // Let's iterate trackingData keys to group by week
-            const volumeData = {}; // "Week 1": 120, "Week 2": 200
-
-            Object.keys(trackingData).forEach(dateStr => {
-                const entry = trackingData[dateStr];
-                if (entry.completed && entry.duration) {
-                    const d = new Date(dateStr);
-                    // Simple week number calc
-                    const oneJan = new Date(d.getFullYear(), 0, 1);
-                    const numberOfDays = Math.floor((d - oneJan) / (24 * 60 * 60 * 1000));
-                    const weekNum = Math.ceil((d.getDay() + 1 + numberOfDays) / 7);
-
-                    const label = `Sem ${weekNum}`;
-                    if (!volumeData[label]) volumeData[label] = 0;
-                    volumeData[label] += entry.duration;
-                }
-            });
+            document.getElementById('statTotalActivities').innerText = totalSessions;
 
             const weekLabels = Object.keys(volumeData).sort(); // simple string sort for now
             const weekValues = weekLabels.map(l => volumeData[l]);
@@ -1257,9 +1296,52 @@
             const container = document.getElementById('main-container');
             container.innerHTML = '';
 
+            // 1. Calculate General Progress Stats
+            const today = new Date();
+            const timeDiff = tripDate.getTime() - startDate.getTime();
+            const totalPlanDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); // Total days in plan
+
+            // Calculate Remaining Days from Today
+            let daysRemaining = Math.ceil((tripDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+            if (daysRemaining < 0) daysRemaining = 0;
+
+            // Calculate Completed (Count Days with > 0 activities)
+            let totalCompleted = 0;
+            Object.values(trackingData).forEach(val => {
+                if (Array.isArray(val) && val.length > 0) totalCompleted++;
+                else if (val && val.completed) totalCompleted++; // Fallback for old object
+            });
+
+            // Progress Percentage (Completed / Total DAYS)
+            // Or should it be Completed / (Days Passed)? 
+            // User said: "if all completed at the end = 100%". So Denominator = TotalPlanDays.
+            let progressPercent = (totalCompleted / totalPlanDays) * 100;
+            if (progressPercent > 100) progressPercent = 100;
+
+            // HTML for Compliance Chart
+            const complianceHtml = `
+                <div class="compliance-card" style="background:#fff; border-radius:8px; padding:15px; margin-bottom:20px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:10px;">
+                        <div>
+                            <div style="font-size:0.75rem; color:#777; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">PROGRESO GENERAL</div>
+                            <div style="font-size:1.8rem; font-weight:800; color:var(--primary); line-height:1;">${progressPercent.toFixed(1)}%</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:0.9rem; font-weight:700; color:#333;">${totalCompleted} / ${totalPlanDays}</div>
+                            <div style="font-size:0.7rem; color:#888;">Complete • ${daysRemaining} Días Restantes</div>
+                        </div>
+                    </div>
+                    <div style="width:100%; height:8px; background:#eee; border-radius:4px; overflow:hidden;">
+                        <div style="width:${progressPercent}%; height:100%; background:var(--primary);"></div>
+                    </div>
+                </div>
+            `;
+
+            // Inject header
+            container.innerHTML = complianceHtml;
+
             // Calculate start date (Monday of the start week)
             let currentDate = new Date(startDate);
-
             let weekCount = 1;
 
             // Generate weeks
@@ -1287,10 +1369,68 @@
                 const endStr = weekEnd.getDate();
                 const monthName = currentDate.toLocaleDateString('es-MX', { month: 'short' }).toUpperCase();
 
+                // MOTIVATIONAL QUOTES
+                const quotes = [
+                    "El dolor es temporal, la gloria es eterna.",
+                    "No pares cuando duela, para cuando termines.",
+                    "Tu única competencia es quien eras ayer.",
+                    "Cada paso cuenta, cada metro suma.",
+                    "La montaña no se conquista, te conquistas a ti mismo.",
+                    "Entrena hoy para disfrutar mañana.",
+                    "La disciplina es el puente entre metas y logros.",
+                    "Si fuera fácil, todos lo harían.",
+                    "Suda ahora, brilla después.",
+                    "Tu cuerpo puede aguantar casi todo. Es tu mente a la que tienes que convencer.",
+                    "No cuentes los días, haz que los días cuenten.",
+                    "El éxito es la suma de pequeños esfuerzos repetidos día tras día.",
+                    "Cae siete veces, levántate ocho.",
+                    "La vista es mejor desde la cima.",
+                    "No te detengas hasta que te sientas orgulloso.",
+                    "La fatiga se va, el orgullo se queda.",
+                    "Hazlo con pasión o no lo hagas.",
+                    "Lo único imposible es aquello que no intentas.",
+                    "Supera tus límites, no tus excusas.",
+                    "Hoy es un buen día para ser más fuerte.",
+                    "El sacrificio de hoy es el éxito de mañana.",
+                    "Cree en ti y todo será posible.",
+                    "La constancia vence al talento.",
+                    "No bajes la meta, aumenta el esfuerzo.",
+                    "Eres más fuerte de lo que crees.",
+                    "Respira hondo y sigue adelante.",
+                    "El camino es duro, pero la recompensa es enorme.",
+                    "Transforma el 'no puedo' en 'ya lo hice'.",
+                    "Tu actitud determina tu altitud.",
+                    "Cada gota de sudor es un paso hacia la cima.",
+                    "Enfócate en la meta, no en el dolor.",
+                    "La resistencia se construye paso a paso.",
+                    "Sé la mejor versión de ti mismo.",
+                    "No sueñes con el éxito, trabaja por él.",
+                    "La montaña te espera, prepárate.",
+                    "El verdadero fracaso es no intentarlo.",
+                    "Desafíate a ti mismo cada día.",
+                    "La fuerza de voluntad es un músculo, entrénalo.",
+                    "Da siempre tu 100%.",
+                    "No busques excusas, busca resultados.",
+                    "El dolor de hoy es la fuerza de mañana.",
+                    "Nunca te rindas, grandes cosas llevan tiempo.",
+                    "Mantén la vista en la cima."
+                ];
+
+                let weekQuote = quotes[(weekCount - 1) % quotes.length];
+
+                // Logic for Final Week (Approx Nov 1st)
+                // If weekEnd includes Nov 1, 2026
+                if (weekEnd >= tripDate) {
+                    weekQuote = "✨ ¡LO LOGRASTE! LA PATAGONIA ES TUYA. ✨";
+                }
+
                 weekBlock.innerHTML = `
-                    <div class="week-header">
-                        <div class="week-title">SEMANA ${weekCount} <span style="color:var(--primary)">//</span> FASE ${phase.id}</div>
-                        <div class="week-dates">${startStr} - ${endStr} ${monthName}</div>
+                    <div class="week-header" style="padding-bottom:10px;">
+                        <div class="week-title-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:5px;">
+                            <div class="week-title" style="white-space:nowrap; flex-shrink:0;">SEMANA ${weekCount} <span style="color:var(--primary)">//</span> FASE ${phase.id}</div>
+                            <div class="week-dates" style="font-size:0.8rem; color:#666;">${startStr} - ${endStr} ${monthName}</div>
+                        </div>
+                        <div class="week-quote" style="font-size:0.8rem; color:#aaa; font-style:italic; margin-top:4px; line-height:1.2; padding-right:10px;">"${weekQuote}"</div>
                     </div>
                 `;
 
@@ -1307,7 +1447,11 @@
                     // Filter Logic
                     let showCard = true;
                     if (filterPhase !== 'all' && phase.id != filterPhase) showCard = false;
-                    if (filterType !== 'all' && routine.type !== filterType) showCard = false;
+                    // If filtering by type, only show if entry exists AND matches type
+                    if (filterType !== 'all') {
+                        if (!entry) showCard = false; // Empty days don't have types
+                        else if (entry.activityType !== filterType) showCard = false;
+                    }
 
                     if (showCard) {
                         const card = document.createElement('div');
@@ -1321,25 +1465,51 @@
                         const rData = routine;
                         const dId = dateId;
 
-                        card.onclick = () => openModal(dId, dIndex, pId, rData);
+                        card.onclick = () => openModal(dId, dIndex, pId, routine); // Pass routine back
 
-                        const displayType = (entry && entry.activityType) ? entry.activityType : routine.type;
+                        let iconId = 'icon-filter';
+                        let displayTitle = routine.title;
+                        let svgHtml = '';
 
-                        let iconId = 'icon-cardio';
-                        if (displayType === 'gym') iconId = 'icon-gym';
-                        else if (displayType === 'rest') iconId = 'icon-rest';
-                        else if (displayType === 'cerro' || displayType === 'hike') iconId = 'icon-cerro';
+                        // Handle Entry Array vs Single Object
+                        let primaryEntry = null;
+                        if (entry) {
+                            if (Array.isArray(entry) && entry.length > 0) primaryEntry = entry[0];
+                            else if (!Array.isArray(entry) && entry.completed) primaryEntry = entry;
+                        }
+
+                        // Determine Display Type
+                        const displayType = (primaryEntry && primaryEntry.activityType) ? primaryEntry.activityType : routine.type;
+
+                        // Map Icons
+                        if (displayType === 'gym' || displayType === 'hit') iconId = 'icon-gym';
+                        else if (displayType === 'rest' || displayType === 'dayoff') iconId = 'icon-rest';
+                        else if (displayType === 'cerro' || displayType === 'hike' || displayType === 'hiking' || displayType === 'trekking') iconId = 'icon-cerro';
                         else if (displayType === 'swim') iconId = 'icon-rest';
+                        else iconId = 'icon-cardio';
 
-                        const iconEl = document.getElementById(iconId) || document.getElementById(routine.icon);
-                        const svgHtml = iconEl.innerHTML;
+                        const iconEl = document.getElementById(iconId);
+                        if (iconEl) svgHtml = iconEl.innerHTML;
 
-                        const displayTitle = (entry && entry.title) ? entry.title : routine.title;
-                        const mealIndicator = (entry && entry.meals) ? '🍎' : '';
+                        if (primaryEntry) {
+                            displayTitle = primaryEntry.title || routine.title;
+                        }
 
+                        // Show "Multiple" indicator?
+                        let extraHtml = '';
+                        if (Array.isArray(entry) && entry.length > 1) {
+                            extraHtml = `<span style="position:absolute; top:2px; right:2px; background:var(--primary); color:white; font-size:9px; width:14px; height:14px; border-radius:50%; display:flex; align-items:center; justify-content:center;">+${entry.length - 1}</span>`;
+                        }
+
+                        if (!entry || (Array.isArray(entry) && entry.length === 0)) {
+                            card.classList.add('planned-only');
+                        }
+
+                        const mealIndicator = (primaryEntry && primaryEntry.meals) ? '🍎' : '';
                         const dayName = currentDate.toLocaleDateString('es-MX', { weekday: 'short' }).toUpperCase();
 
                         card.innerHTML = `
+                            ${extraHtml}
                             <div class="day-phase" style="right:0; left:auto; border-radius:0 0 0 4px;">${dayName}</div>
                             <div class="day-date">${currentDate.getDate()}</div>
                             <svg class="activity-icon" viewBox="0 0 24 24">${svgHtml}</svg>
@@ -1399,20 +1569,48 @@
             document.querySelectorAll('#typeSelector .type-btn').forEach(b => b.classList.remove('active'));
             if (btn) btn.classList.add('active');
 
-            // Toggle Data Fields
+            // Toggle Data Fields based on Type
             const dataFields = document.getElementById('dataFields');
-            if (type === 'rest') {
+            const distField = document.getElementById('distanceField');
+            const elevField = document.getElementById('elevationField');
+
+            // Reset visibility
+            dataFields.style.opacity = '1';
+            dataFields.style.pointerEvents = 'auto';
+            if (distField) distField.style.display = 'block';
+            if (elevField) elevField.style.display = 'block';
+
+            if (type === 'dayoff') {
                 dataFields.style.opacity = '0.3';
                 dataFields.style.pointerEvents = 'none';
+            } else if (type === 'hit') {
+                // HIT: Time, Cals only
+                if (distField) distField.style.display = 'none';
+                if (elevField) elevField.style.display = 'none';
+            } else if (type === 'walk' || type === 'running') {
+                // Walk/Run: Dist, Time, Cals (No Elev)
+                if (elevField) elevField.style.display = 'none';
             } else {
-                dataFields.style.opacity = '1';
-                dataFields.style.pointerEvents = 'auto';
+                // Hike/Trek: All fields
             }
         }
 
+        // GLOBAL for Modal Logic
+        let currentActivityIndex = 0; // 0, 1, 2...
+        // For multi-activity, trackingData[date] will be an ARRAY of objects.
+        // Old data (Object) will be migrated on the fly or just handled.
+
         function openModal(dateStr, dayOfWeek, phase, routine) {
             selectedDateId = dateStr;
-            const entry = trackingData[dateStr];
+            let entry = trackingData[dateStr];
+
+            // 1. MIGRATION: Ensure Array
+            if (entry && !Array.isArray(entry)) {
+                entry = [entry];
+                trackingData[dateStr] = entry; // Persist migration
+            }
+            if (!entry) entry = []; // Empty array if no data
+
             document.getElementById('modal').style.display = 'flex';
 
             const parts = dateStr.split('-');
@@ -1420,56 +1618,105 @@
 
             document.getElementById('modalDate').innerText = d.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
 
-            // Set basic info
-            document.getElementById('modalTitle').innerText = routine.title; // Default title
+            // RENDER TABS
+            renderActivityTabs(entry);
 
-            // Handle Description based on Phase for Cerro
-            let desc = routine.desc;
-            if (routine.type === 'cerro') {
-                if (phase.id === 1) desc = "Cerro San Juan (Mitad) o La Cruz. Sin peso extra.";
-                if (phase.id === 2) desc = "Cerro San Juan Completo. Botas nuevas y mochila 4kg.";
-                if (phase.id === 3) desc = "Ruta Larga (10km+). Mochila peso real (8kg).";
-            }
-            document.getElementById('modalDescription').innerText = desc;
-            document.getElementById('modalNote').innerText = routine.note;
-
-            // Load Existing Data or Defaults
-            if (entry) {
-                document.getElementById('journalInput').value = entry.note || "";
-                document.getElementById('mealsInput').value = entry.meals || "";
-                document.getElementById('customTitleInput').value = entry.title || "";
-
-                document.getElementById('durationInput').value = entry.duration || "";
-                document.getElementById('caloriesInput').value = entry.calories || "";
-
-                // Set Type
-                currentSelectedType = entry.activityType || routine.type;
-
-                const btn = document.getElementById('completeBtn');
-                btn.innerText = "ACTUALIZAR / ELIMINAR"; // Could add a separate delete btn later
+            // Select Default (Last one or 0)
+            // If empty, we are in "New" mode at index 0 (virtual)
+            if (entry.length === 0) {
+                currentActivityIndex = -1; // -1 means NEW
+                loadFormEmpty(routine);
             } else {
-                // New Entry
-                document.getElementById('journalInput').value = "";
-                document.getElementById('mealsInput').value = "";
-                document.getElementById('customTitleInput').value = routine.title;
-                document.getElementById('durationInput').value = "";
-                document.getElementById('caloriesInput').value = "";
-
-                currentSelectedType = routine.type;
-                document.getElementById('completeBtn').innerText = "GUARDAR ACTIVIDAD";
+                currentActivityIndex = 0; // Select first by default
+                loadFormFromEntry(entry[0]);
             }
+        }
 
-            // Update UI for Type Selector
-            // Find button with onclick containing the type
+        function renderActivityTabs(entryArray) {
+            const container = document.getElementById('coachSection'); // Using this space for Tabs now
+            // Or create a new container above inputs? Let's use coachSection as the container wrapper
+
+            let html = `<div style="display:flex; gap:10px; margin-bottom:10px; overflow-x:auto;">`;
+
+            // Existing entries
+            entryArray.forEach((e, idx) => {
+                const activeStyle = (idx === currentActivityIndex) ? 'border:1px solid var(--primary); color:white;' : 'border:1px solid #444; color:#777;';
+                html += `<button onclick="switchTab(${idx})" style="padding:5px 10px; background:#222; border-radius:4px; font-size:0.8rem; cursor:pointer; ${activeStyle}">${e.title || 'Actividad'}</button>`;
+            });
+
+            // Add New Button
+            const addStyle = (currentActivityIndex === -1) ? 'border:1px solid var(--primary); color:white;' : 'border:1px solid #444; color:#777;';
+            html += `<button onclick="switchTab(-1)" style="padding:5px 10px; background:#222; border-radius:4px; font-size:0.8rem; cursor:pointer; ${addStyle}">+ AÑADIR</button>`;
+
+            html += `</div>`;
+
+            // Add Phase Info below tabs
+            // html += `<small style="display:block; color:#666; font-size:0.7rem;">Fase: ${document.getElementById('modalDescription').innerText}</small>`;
+
+            container.innerHTML = html;
+        }
+
+        function switchTab(index) {
+            currentActivityIndex = index;
+            let entry = trackingData[selectedDateId];
+            if (!Array.isArray(entry)) entry = [];
+
+            // Re-render tabs to update highlight
+            renderActivityTabs(entry);
+
+            if (index === -1) {
+                loadFormEmpty();
+            } else {
+                loadFormFromEntry(entry[index]);
+            }
+        }
+
+        function loadFormEmpty(routine) {
+            document.getElementById('modalTitle').innerText = "NUEVA ACTIVIDAD";
+            document.getElementById('journalInput').value = "";
+            document.getElementById('mealsInput').value = "";
+            document.getElementById('customTitleInput').value = (routine && routine.title) ? routine.title : "";
+
+            document.getElementById('durationInput').value = "";
+            document.getElementById('caloriesInput').value = "";
+            document.getElementById('distanceInput').value = "";
+            document.getElementById('elevationInput').value = "";
+
+            currentSelectedType = (routine && routine.type) ? routine.type : 'walk';
+
+            // UI
+            updateTypeUI(currentSelectedType);
+
+            document.getElementById('completeBtn').innerText = "GUARDAR (NUEVO)";
+            document.getElementById('deleteBtn').style.display = 'none';
+        }
+
+        function loadFormFromEntry(data) {
+            document.getElementById('modalTitle').innerText = data.title || "ACTIVIDAD";
+            document.getElementById('journalInput').value = data.note || "";
+            document.getElementById('mealsInput').value = data.meals || "";
+            document.getElementById('customTitleInput').value = data.title || "";
+
+            document.getElementById('durationInput').value = data.duration || "";
+            document.getElementById('caloriesInput').value = data.calories || "";
+            document.getElementById('distanceInput').value = data.distance || "";
+            document.getElementById('elevationInput').value = data.elevation || "";
+
+            currentSelectedType = data.activityType || 'walk';
+            updateTypeUI(currentSelectedType);
+
+            document.getElementById('completeBtn').innerText = "ACTUALIZAR";
+            document.getElementById('deleteBtn').style.display = 'block';
+        }
+
+        function updateTypeUI(type) {
             document.querySelectorAll('#typeSelector .type-btn').forEach(b => {
                 b.classList.remove('active');
-                if (b.getAttribute('onclick').includes(`'${currentSelectedType}'`)) {
+                if (b.getAttribute('onclick').includes(`'${type}'`)) {
                     b.classList.add('active');
                 }
             });
-
-            // Trigger visual toggle logic
-            selectType(currentSelectedType, document.querySelector(`.type-btn[onclick*="'${currentSelectedType}'"]`));
+            selectType(type, document.querySelector(`.type-btn[onclick*="'${type}'"]`));
         }
 
         function saveActivity() {
@@ -1478,24 +1725,62 @@
             const title = document.getElementById('customTitleInput').value || "Actividad";
             const duration = document.getElementById('durationInput').value;
             const calories = document.getElementById('caloriesInput').value;
+            const distance = document.getElementById('distanceInput').value;
+            const elevation = document.getElementById('elevationInput').value;
 
-            // If empty note and empty meals and no change, maybe delete? 
-            // prioritizing user intent: click save = save.
-
-            trackingData[selectedDateId] = {
+            const newActivityObj = {
                 completed: true,
                 activityType: currentSelectedType,
                 title: title,
                 note: note,
                 meals: meals,
                 duration: duration ? parseInt(duration) : 0,
-                calories: calories ? parseInt(calories) : 0
+                calories: calories ? parseInt(calories) : 0,
+                distance: distance ? parseFloat(distance) : 0,
+                elevation: elevation ? parseInt(elevation) : 0
             };
+
+            // Get current array
+            let entryArray = trackingData[selectedDateId];
+            if (!Array.isArray(entryArray)) {
+                entryArray = [];
+                trackingData[selectedDateId] = entryArray;
+            }
+
+            if (currentActivityIndex === -1) {
+                // ADD NEW
+                entryArray.push(newActivityObj);
+            } else {
+                // UPDATE EXISTING
+                if (entryArray[currentActivityIndex]) {
+                    entryArray[currentActivityIndex] = newActivityObj;
+                }
+            }
 
             localStorage.setItem('patagoniaFinal_v6', JSON.stringify(trackingData));
             closeModal();
             renderCalendar();
             updateStats();
+        }
+
+        function deleteActivity() {
+            if (confirm("¿Estás seguro de que quieres eliminar esta actividad?")) {
+                let entryArray = trackingData[selectedDateId];
+                if (Array.isArray(entryArray)) {
+                    // Remove at key
+                    entryArray.splice(currentActivityIndex, 1);
+
+                    // If empty, delete key? Or keep empty array? Keep array is fine.
+                    if (entryArray.length === 0) {
+                        delete trackingData[selectedDateId]; // Cleaner to delete key if empty
+                    }
+
+                    localStorage.setItem('patagoniaFinal_v6', JSON.stringify(trackingData));
+                }
+                closeModal();
+                renderCalendar();
+                updateStats();
+            }
         }
 
         function closeModal() {
