@@ -108,14 +108,14 @@
 
     .drawer-sidebar {
         position: fixed; top: 0; left: 0; z-index: 101;
-        width: 280px; height: 100%;
-        background: rgba(30, 41, 59, 0.9);
-        backdrop-filter: blur(12px); 
-        -webkit-backdrop-filter: blur(12px);
+        width: 280px; height: 100vh;
+        /* CHANGED: Use --bg-card for theme support (White in Light, Dark in Dark) */
+        background: var(--bg-card);
+        /* Solid background, no blur */
         box-shadow: 2px 0 20px rgba(0,0,0,0.5);
         display: flex; flex-direction: column;
         transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-        border-right: 1px solid rgba(255,255,255,0.05);
+        border-right: 1px solid var(--border);
     }
     .drawer-sidebar.closed { transform: translateX(-100%); }
 
@@ -129,7 +129,9 @@
     .drawer-nav { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
     
     .nav-item {
-        background: transparent; border: none; color: var(--text-muted);
+        background: transparent; border: none; 
+        /* CHANGED: Use --text-main so it is visible in light mode */
+        color: var(--text-main);
         text-align: left; font-size: 1.1rem; padding: 12px;
         border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 15px;
         font-family: 'Inter', sans-serif; font-weight: 600;

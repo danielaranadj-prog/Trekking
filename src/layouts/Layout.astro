@@ -32,12 +32,11 @@ const { title } = Astro.props;
 		
 		--bg-main: #0f172a;
 		--bg-card: #1e293b;
-		--bg-input: #0f172a;
+		--bg-input: #0f172a; /* Ensure input bg is dark by default */
 		
 		--text-main: #ffffff;
 		--text-muted: #94a3b8;
 		
-		/* Missing vars fixed */
 		--text-white: #ffffff;
 		--text-gray: #9ca3af;
 		
@@ -58,7 +57,7 @@ const { title } = Astro.props;
 			--text-main: #0f172a;
 			--text-muted: #64748b;
 			
-			--border: #e2e8f0;
+			--border: #cbd5e1; /* Slightly darker border for light mode */
 			--shadow: rgba(0,0,0,0.1);
 		}
 	}
