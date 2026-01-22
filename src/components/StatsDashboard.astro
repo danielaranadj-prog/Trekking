@@ -131,9 +131,8 @@
 <style>
     .dashboard-wrapper { padding: 10px; display: flex; flex-direction: column; gap: 10px; }
 
-    /* CARDS */
     .stat-card {
-        background: var(--bg-card); /* Adaptive */
+        background: var(--bg-card); 
         border-radius: 12px; padding: 10px 4px; text-align: center;
         border: 1px solid rgba(255,255,255,0.05);
         box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
@@ -152,7 +151,6 @@
     }
     .text-primary { color: var(--primary) !important; text-shadow: 0 0 10px rgba(234, 88, 12, 0.3); }
 
-    /* ASCENT */
     .ascent-card {
         background: var(--bg-card); padding: 12px; border-radius: 12px;
         border-top: 3px solid #10b981;
@@ -169,14 +167,6 @@
     .milestones { flex: 1; position: relative; font-size: 0.6rem; color: var(--text-muted); }
     .ms { position: absolute; width: 100%; border-bottom: 1px dashed var(--border); padding-bottom: 1px; line-height: 1;}
 
-    /* PROGRESS CARD (Inverted logic for light mode?) 
-       User wanted "White Card". 
-       In Light Mode, main BG is Light, Card is White... so it blends?
-       Maybe give it a different background or shadow pop.
-       In Dark Mode: Main Dark, Card White (as requested).
-       Let's stick to "White" explicit for contrast in Dark Mode.
-       In Light Mode, White is just normal... maybe make it Off-White or stick to White with Shadow.
-    */
     .white-progress-card {
         background: var(--bg-card); 
         border-radius: 12px;
@@ -185,10 +175,6 @@
         border: 1px solid rgba(255,255,255,0.05);
         position: relative; overflow: hidden;
     }
-    /* Subtle glow behind card? Maybe simpler for now */
-    
-    /* ADAPTIVE OVERRIDES */
-    /* If Dark Mode, ensure high contrast if we want. */
     
     .wp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
     .wp-title { font-family: var(--font-head); font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin: 0; }

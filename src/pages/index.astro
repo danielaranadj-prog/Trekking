@@ -111,17 +111,18 @@ import StatisticsView from '../components/StatisticsView.astro';
         min-height: 100vh;
         background: var(--bg-main);
         box-shadow: 0 0 50px var(--shadow);
-        overflow-x: hidden; /* Prevent horizontal scroll during anim */
+        overflow-x: hidden;
         position: relative;
     }
 
     .app-header {
         display: flex; justify-content: space-between; align-items: center;
         padding: 15px 20px;
-        background: rgba(15, 23, 42, 0.8); /* Glass base */
-        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(12px); 
+        -webkit-backdrop-filter: blur(12px);
         position: sticky; top: 0; z-index: 50;
-        border-bottom: 1px solid rgba(255,255,255,0.05); /* Subtle border */
+        border-bottom: 1px solid rgba(255,255,255,0.05);
     }
 
     .logo-area { display: flex; align-items: center; gap: 8px; text-align: center; }
@@ -132,42 +133,24 @@ import StatisticsView from '../components/StatisticsView.astro';
     }
     .brand-orange {
         font-family: var(--font-head); color: var(--primary); font-size: 1.1rem; letter-spacing: 0.5px;
-        text-shadow: 0 0 10px rgba(234, 88, 12, 0.4); /* Neon Glow */
+        text-shadow: 0 0 10px rgba(234, 88, 12, 0.4);
     }
 
-    /* VIEW TRANSITIONS SYSTEM */
     #views-wrapper {
         position: relative;
         width: 100%;
-        /* Min height to avoid collapse? handled by content */
     }
 
     .view-section {
         width: 100%;
         transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
-        position: relative; /* Default relative so they stack normally if active */
+        position: relative;
     }
     
-    /* When animating, we might need them absolute to overlap? 
-       Actually, safest is: 
-       Active view is Relative.
-       Exiting view becomes Absolute to overlay/underlay?
-       
-       Simpler approach: 
-       Both Absolute top:0 left:0 during transition? 
-       That requires wrapper to have height. Wrapper height changes.
-       
-       Let's use the "Swap" technique:
-       1. Both visible.
-       2. Use transforms.
-    */
-    
-    /* REFINED ANIMATION CLASSES */
     .view-section.hidden {
         display: none;
     }
 
-    /* Animations */
     .slide-in-right { animation: slideInRight 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
     .slide-out-left { animation: slideOutLeft 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; display: block !important; position: absolute; top:0; left:0; width:100%; }
 
