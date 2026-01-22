@@ -56,16 +56,51 @@ import StatisticsView from '../components/StatisticsView.astro';
 
     const vHome = document.getElementById('view-home');
     const vStats = document.getElementById('view-stats');
+    const viewsWrapper = document.getElementById('views-wrapper');
+    
+    // We need to track previous view to know direction
+    let lastView = 'home';
 
     currentView.subscribe(view => {
-        // Simple Toggle
-        if(view === 'home') {
+        if(view === lastView) return;
+
+        // Determine Direction
+        // Home -> Stats : Slide Left (Home exits Left, Stats enters from Right)
+        // Stats -> Home : Slide Right (Stats exits Right, Home enters from Left)
+        
+        if(view === 'stats') {
+            // GOING TO STATS
+            vHome.classList.remove('active');
+            vHome.classList.add('slide-out-left');
+            
+            vStats.classList.remove('hidden'); // Make visible first
+            vStats.classList.add('active');
+            vStats.classList.add('slide-in-right');
+            
+            // Cleanup classes after anim
+            setTimeout(() => {
+                vHome.classList.add('hidden');
+                vHome.classList.remove('slide-out-left');
+                vStats.classList.remove('slide-in-right');
+            }, 300);
+
+        } else if(view === 'home') {
+            // GOING TO HOME
+            vStats.classList.remove('active');
+            vStats.classList.add('slide-out-right');
+
             vHome.classList.remove('hidden');
-            vStats.classList.add('hidden');
-        } else if(view === 'stats') {
-            vHome.classList.add('hidden');
-            vStats.classList.remove('hidden');
+            vHome.classList.add('active');
+            vHome.classList.add('slide-in-left');
+
+            setTimeout(() => {
+                vStats.classList.add('hidden');
+                vStats.classList.remove('slide-out-right');
+                vHome.classList.remove('slide-in-left');
+            }, 300);
         }
+
+        lastView = view;
     });
 </script>
 
@@ -76,14 +111,17 @@ import StatisticsView from '../components/StatisticsView.astro';
         min-height: 100vh;
         background: var(--bg-main);
         box-shadow: 0 0 50px var(--shadow);
+        overflow-x: hidden; /* Prevent horizontal scroll during anim */
+        position: relative;
     }
 
     .app-header {
         display: flex; justify-content: space-between; align-items: center;
         padding: 15px 20px;
-        background: var(--bg-main);
+        background: rgba(15, 23, 42, 0.8); /* Glass base */
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         position: sticky; top: 0; z-index: 50;
-        border-bottom: 3px solid var(--bg-card);
+        border-bottom: 1px solid rgba(255,255,255,0.05); /* Subtle border */
     }
 
     .logo-area { display: flex; align-items: center; gap: 8px; text-align: center; }
@@ -94,10 +132,52 @@ import StatisticsView from '../components/StatisticsView.astro';
     }
     .brand-orange {
         font-family: var(--font-head); color: var(--primary); font-size: 1.1rem; letter-spacing: 0.5px;
+        text-shadow: 0 0 10px rgba(234, 88, 12, 0.4); /* Neon Glow */
+    }
+
+    /* VIEW TRANSITIONS SYSTEM */
+    #views-wrapper {
+        position: relative;
+        width: 100%;
+        /* Min height to avoid collapse? handled by content */
     }
 
     .view-section {
-        animation: fadeIn 0.3s ease;
+        width: 100%;
+        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+        position: relative; /* Default relative so they stack normally if active */
     }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* When animating, we might need them absolute to overlap? 
+       Actually, safest is: 
+       Active view is Relative.
+       Exiting view becomes Absolute to overlay/underlay?
+       
+       Simpler approach: 
+       Both Absolute top:0 left:0 during transition? 
+       That requires wrapper to have height. Wrapper height changes.
+       
+       Let's use the "Swap" technique:
+       1. Both visible.
+       2. Use transforms.
+    */
+    
+    /* REFINED ANIMATION CLASSES */
+    .view-section.hidden {
+        display: none;
+    }
+
+    /* Animations */
+    .slide-in-right { animation: slideInRight 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+    .slide-out-left { animation: slideOutLeft 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; display: block !important; position: absolute; top:0; left:0; width:100%; }
+
+    .slide-in-left { animation: slideInLeft 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+    .slide-out-right { animation: slideOutRight 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; display: block !important; position: absolute; top:0; left:0; width:100%; }
+
+    @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOutLeft { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-20%); opacity: 0; } }
+
+    @keyframes slideInLeft { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(20%); opacity: 0; } }
+
 </style>

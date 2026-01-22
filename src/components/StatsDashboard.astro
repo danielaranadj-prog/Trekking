@@ -134,25 +134,31 @@
     /* CARDS */
     .stat-card {
         background: var(--bg-card); /* Adaptive */
-        border-radius: 6px; padding: 8px 4px; text-align: center;
-        border: 1px solid var(--border);
+        border-radius: 12px; padding: 10px 4px; text-align: center;
+        border: 1px solid rgba(255,255,255,0.05);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+        transition: transform 0.2s;
     }
-    .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+    .stat-card:active { transform: scale(0.98); }
+    
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
     .stat-card h3 {
-        font-family: var(--font-body); font-size: 0.5rem; color: var(--text-muted); margin: 0 0 2px 0; font-weight: 700; text-transform: uppercase;
+        font-family: var(--font-body); font-size: 0.55rem; color: var(--text-muted); margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
     }
     .stat-card p {
-        font-family: var(--font-head); font-size: 1.2rem; margin: 0; color: var(--text-main); line-height: 1;
+        font-family: var(--font-head); font-size: 1.25rem; margin: 0; color: var(--text-main); line-height: 1;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
-    .text-primary { color: var(--primary) !important; }
+    .text-primary { color: var(--primary) !important; text-shadow: 0 0 10px rgba(234, 88, 12, 0.3); }
 
     /* ASCENT */
     .ascent-card {
-        background: var(--bg-card); padding: 10px; border-radius: 8px;
-        border-top: 2px solid #10b981;
+        background: var(--bg-card); padding: 12px; border-radius: 12px;
+        border-top: 3px solid #10b981;
         display: flex; flex-direction: column; height: 140px;
-        border: 1px solid var(--border); border-top-width: 2px;
+        border: 1px solid rgba(255,255,255,0.05); border-top-width: 3px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
     }
     .ascent-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
     .lbl-title { color: var(--text-main); font-size: 0.8rem; }
@@ -172,30 +178,14 @@
        In Light Mode, White is just normal... maybe make it Off-White or stick to White with Shadow.
     */
     .white-progress-card {
-        background: #ffffff; /* Explicitly white always? Or Adaptive? */
-        /* User image showed white card on dark bg. */
-        /* If system is Light, white card on light bg is fine. */
-        /* Let's follow variable logic but ensure contrast. */
         background: var(--bg-card); 
-        /* Wait, if I use var(--bg-card) in Dark Mode it is #1e293b (Dark). 
-           User SPECIFICALLY asked for the "White Card" look in dark mode. 
-           So for Dark Mode, this specific card should stay White? 
-           Or did they just like the layout? "implementé la tarjeta BLANCA estilo imagen".
-           If I make it adaptive, I lose that specific "White on Dark" look.
-           But user said "ADAPTE AL COLOR DEL SISTEMA".
-           If System is Dark -> They probably want Dark Theme.
-           The "Reference Image" was dark mode but with a white/light card.
-           I will try to keep it adaptive (Dark Card in Dark Mode) BUT user just said "White Card style".
-           Let's make it stand out.
-           Actually, consistent Dark Theme usually means Dark Cards. 
-           I will use var(--bg-card) which adapts. If they hate it I can revert.
-           BUT I will add a border-left or highlight.
-        */
-        border-radius: 10px;
-        padding: 12px 15px;
-        box-shadow: 0 2px 10px var(--shadow);
-        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.05);
+        position: relative; overflow: hidden;
     }
+    /* Subtle glow behind card? Maybe simpler for now */
     
     /* ADAPTIVE OVERRIDES */
     /* If Dark Mode, ensure high contrast if we want. */

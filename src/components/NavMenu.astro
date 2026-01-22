@@ -112,10 +112,12 @@
     .drawer-sidebar {
         position: fixed; top: 0; left: 0; z-index: 101;
         width: 280px; height: 100%;
-        background: var(--bg-card);
+        background: rgba(30, 41, 59, 0.9); /* Semi-transparent Slate 800 */
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         box-shadow: 2px 0 20px rgba(0,0,0,0.5);
         display: flex; flex-direction: column;
-        transition: transform 0.3s ease-in-out;
+        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        border-right: 1px solid rgba(255,255,255,0.05);
     }
     .drawer-sidebar.closed { transform: translateX(-100%); }
 

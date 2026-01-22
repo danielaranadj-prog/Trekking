@@ -104,6 +104,7 @@ import ActivityIcon from './ActivityIcon.astro';
     let currentType = 'walking';
 
     const modal = document.getElementById('activityModal');
+    const modalContent = document.querySelector('.modal-content');
     // Inputs
     const iTitle = document.getElementById('inpTitle');
     const iDur = document.getElementById('inpDur');
@@ -158,7 +159,13 @@ import ActivityIcon from './ActivityIcon.astro';
     // MAIN OPEN FUNCTION
     window.openActivityModal = (dId) => {
         currentDateId = dId;
+        
+        // ANIMATION OPEN
         modal.classList.remove('hidden');
+        // Force Reflow
+        void modal.offsetWidth;
+        modal.classList.add('visible');
+        
         renderList();
         
         // Start in "Add New" mode
@@ -234,7 +241,13 @@ import ActivityIcon from './ActivityIcon.astro';
         iNote.value = '';
     }
 
-    function closeModal() { modal.classList.add('hidden'); ddMenu.classList.add('hidden'); }
+    function closeModal() { 
+        modal.classList.remove('visible');
+        ddMenu.classList.add('hidden');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
     document.getElementById('closeModalBtn').onclick = closeModal;
 
     // LOGIC PER SPORT
@@ -321,89 +334,52 @@ import ActivityIcon from './ActivityIcon.astro';
 <style>
     .modal {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(15, 23, 42, 0.95); z-index: 999;
-        display: flex; align-items: center; justify-content: center;
+        background: rgba(15, 23, 42, 0.0); /* Start transparent */
+        z-index: 999;
+        display: flex; align-items: flex-end; /* Align bottom for sheet */
+        justify-content: center;
+        transition: background 0.3s ease;
+        padding-bottom: 20px; /* Safe area */
     }
+    
+    .modal.hidden {
+        display: none;
+    }
+
+    .modal.visible {
+        background: rgba(15, 23, 42, 0.85); /* Darken bg when visible */
+        backdrop-filter: blur(4px);
+    }
+
     .modal-content {
-        background: #1e293b; width: 90%; max-width: 450px;
-        border-radius: 16px; padding: 20px;
-        box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+        background: #1e293b; width: 95%; max-width: 500px;
+        border-radius: 20px 20px 0 0; /* Sheet look */
+        padding: 20px;
+        box-shadow: 0 -4px 30px rgba(0,0,0,0.5);
         display: flex; flex-direction: column;
-        max-height: 90vh; 
+        max-height: 85vh; 
+        
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        border: 1px solid var(--border); border-bottom: none;
     }
-    .modal-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
-    .close-btn { font-size: 2rem; color: #64748b; line-height: 0.8; }
-    .form-body { overflow-y: auto; padding-right: 5px; }
-
-    /* LIST STYLES */
-    .activities-list {
-        background: #0f172a; border-radius: 8px; padding: 8px; margin-bottom: 15px;
-        border: 1px solid #334155;
-    }
-    .act-item-row {
-        display: flex; justify-content: space-between; align-items: center;
-        background: #1e293b; padding: 8px; border-radius: 4px; margin-bottom: 5px;
-    }
-    .act-item-row:last-child { margin-bottom: 0; }
-    .act-info { display: flex; gap: 8px; align-items: center; }
-    .act-type-badge {
-        font-size: 0.6rem; text-transform: uppercase; background: #334155; padding: 2px 6px; border-radius: 4px; color: #cbd5e1;
-    }
-    .act-idx-title { font-size: 0.85rem; color: white; font-weight: 600; }
-    .act-edit-btn { background: none; border: none; cursor: pointer; font-size: 0.9rem; }
-
-    /* DROPDOWN & INPUTS (Inherited mostly, refined for layout) */
-    .dropdown-wrapper { position: relative; margin-bottom: 20px; z-index: 50; }
-    .dropdown-btn {
-        width: 100%; background: #334155; color: white; border: 1px solid #475569;
-        padding: 12px 15px; border-radius: 8px;
-        display: flex; justify-content: space-between; align-items: center;
-        cursor: pointer; transition: 0.2s;
-    }
-    .dropdown-btn:hover { border-color: var(--primary); background: #475569; }
-    .dd-left { display: flex; align-items: center; gap: 10px; font-weight: 700; text-transform: uppercase; }
-    .dd-chevron { font-size: 0.8rem; color: #cbd5e1; }
-    .dd-icon { color: var(--primary); display: flex; align-items: center; }
-
-    .dropdown-menu {
-        position: absolute; top: 110%; left: 0; width: 100%;
-        background: #0f172a; border: 1px solid #334155; border-radius: 8px;
-        padding: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 100;
-    }
-    .grid-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .opt-btn {
-        background: #1e293b; border: 1px solid #334155; color: #cbd5e1;
-        padding: 8px; border-radius: 6px; font-size: 0.9rem;
-        display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.1s;
-    }
-    .opt-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-
-    /* INPUTS */
-    input, textarea {
-        background: #0f172a; border: 1px solid #334155;
-        color: white; padding: 10px; border-radius: 8px;
-        width: 100%; font-size: 1rem;
-        box-sizing: border-box;
-    }
-    .full-width { margin-bottom: 10px; font-weight: 700; width: 100%; }
     
-    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; width: 100%; }
-    .grp label { 
-        display: block; font-size: 0.65rem; color: #64748b; margin-bottom: 3px; font-weight: 700; 
+    /* Desktop optimization: Center it and don't be a sheet */
+    @media (min-width: 600px) {
+        .modal { align-items: center; padding-bottom: 0; }
+        .modal-content {
+             border-radius: 16px; 
+             transform: scale(0.9) translateY(20px); opacity: 0;
+             transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .modal.visible .modal-content {
+            transform: scale(1) translateY(0); opacity: 1;
+        }
     }
-    .lbl-primary { color: var(--primary) !important; }
-    .inp-highlight { border-color: var(--primary); }
-
-    .actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; } /* Edit mode might need 3 buttons */
-    /* If adding new (default), we hide Cancel/Delete, so Save spans. We can adjust via JS classes. */
-    /* But simplified: Actions Flex */
-    .actions { display: flex; gap: 10px; margin-top: 15px; }
     
-    .btn-save {
-        background: var(--primary); color: white; padding: 12px; border-radius: 8px;
-        font-weight: 800; text-transform: uppercase; flex: 1; font-size: 0.95rem; cursor: pointer; border: none;
+    /* Mobile Sheet Animation */
+    @media (max-width: 599px) {
+        .modal.visible .modal-content {
+            transform: translateY(0);
+        }
     }
-    .btn-del {
-        background: #ef4444; color: white; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; cursor: pointer; border: none;
-    }
-</style>
