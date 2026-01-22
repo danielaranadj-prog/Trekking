@@ -24,30 +24,28 @@ const todayClass = isToday ? 'today' : '';
 <style>
     .day-card {
         position: relative;
-        background: var(--bg-card); /* Slate 800 */
-        border: 1px solid #334155;  /* Slate 700 */
+        background: var(--bg-card);
+        border: 1px solid #334155;
         border-radius: 12px;
-        min-height: 80px; /* Large Target */
-        min-width: 60px; /* For horiz scroll */
+        min-height: 80px; 
+        min-width: 60px;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         padding: 5px;
         transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
         overflow: hidden;
-        /* Slight inner glow for depth */
         box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    /* STATES */
     .day-card.completed {
-        border-color: var(--primary); /* Orange Border */
+        border-color: var(--primary);
         background: linear-gradient(180deg, rgba(234, 88, 12, 0.1) 0%, rgba(30, 41, 59, 1) 100%);
         box-shadow: 0 0 15px rgba(234, 88, 12, 0.15), inset 0 1px 0 rgba(255,255,255,0.05);
     }
 
     .day-card.today {
-        border: 2px solid var(--text-white); /* High vis for today */
+        border: 2px solid var(--text-white);
         box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-        z-index: 2; /* Pop out */
+        z-index: 2;
         transform: scale(1.02);
     }
     
@@ -56,7 +54,6 @@ const todayClass = isToday ? 'today' : '';
         background: #334155;
     }
 
-    /* TEXT & ICONS */
     .day-number {
         position: absolute; top: 4px; right: 6px;
         font-size: 0.75rem; color: var(--text-muted); font-weight: 700;
@@ -84,7 +81,6 @@ const todayClass = isToday ? 'today' : '';
     }
     .completed .day-label { color: var(--text-white); }
 
-    /* BADGES */
     .badge-weight {
         font-size: 0.8rem; margin-left: -5px;
     }
